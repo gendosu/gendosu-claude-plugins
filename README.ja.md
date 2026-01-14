@@ -85,74 +85,6 @@ CCMP (Claude Code Marketplace) は、Claude Code向けの生産性向上プラ�
 /plugin install cccp@gendosu-claude-plugins
 ```
 
-## プラグイン開発
-
-### ディレクトリ構造
-
-```
-ccmp/
-├── .claude-plugin/
-│   └── marketplace.json       # マーケットプレイスマニフェスト
-├── plugins/
-│   └── cccp/                  # CCCPプラグイン
-│       ├── .claude-plugin/
-│       │   └── plugin.json
-│       ├── skills/
-│       ├── commands/
-│       ├── README.md
-│       └── LICENSE
-├── docs/
-│   └── memory/                # 調査・計画記録
-├── README.md                  # 英語版マーケットプレイス説明
-├── README.ja.md               # 日本語版マーケットプレイス説明
-├── LICENSE                    # MITライセンス
-└── .gitignore
-```
-
-### 新しいプラグインの追加
-
-1. `plugins/`配下に新しいディレクトリを作成
-2. プラグインのメタデータを含む`.claude-plugin/plugin.json`を追加
-3. スキルまたはコマンドを実装
-4. `marketplace.json`を更新して新しいプラグインを登録
-5. プラグインのREADME.mdにドキュメントを追加
-
-### プラグインの自己完結性（重要）
-
-Claude Codeはプラグインをキャッシュにコピーするため、`../`を使用した相対パス参照はサポートされていません。各プラグインは必要なファイルをすべて含む自己完結型である必要があります。
-
-## バージョン管理
-
-- **マーケットプレイスバージョン:** `marketplace.json`で管理（現在: v1.0.0）
-- **個別プラグインバージョン:** 各プラグインエントリ内で管理
-- **Gitタグ:** マーケットプレイス全体でバージョン管理
-
-## トラブルシューティング
-
-### プラグインが見つからない
-
-マーケットプレイスが正しく追加されているか確認してください:
-
-```bash
-/plugin marketplace list
-```
-
-### インストールに失敗する
-
-1. `jq`でmarketplace.jsonの構文を検証:
-   ```bash
-   jq . .claude-plugin/marketplace.json
-   ```
-
-2. プラグインの`plugin.json`が存在するか確認:
-   ```bash
-   ls plugins/*/.claude-plugin/plugin.json
-   ```
-
-### プラグインが読み込まれない
-
-すべての必要なファイルがプラグインディレクトリ内にあり、`../`による外部依存関係がないことを確認してください。
-
 ## ライセンス
 
 このプロジェクトはMITライセンスの下でライセンスされています - 詳細は[LICENSE](LICENSE)ファイルを参照してください。
@@ -163,7 +95,7 @@ Claude Codeはプラグインをキャッシュにコピーするため、`../`�
 
 ## 作者
 
-**Gendosu**
+**GENDOSU**
 
 ## リポジトリ
 
