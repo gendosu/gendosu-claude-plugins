@@ -68,6 +68,14 @@ CCMP (Claude Code Marketplace) is a monorepo containing productivity plugins for
     <td rowspan="1">0.1.1</td>
     <td rowspan="1"><a href="./plugins/codex/README.md">README</a></td>
   </tr>
+  <tr>
+    <td rowspan="1"><strong>skill-creator</strong></td>
+    <td rowspan="1">Comprehensive guide for creating effective Claude Code skills</td>
+    <td>Skill</td>
+    <td>skill-creator - Skill design patterns, initialization, validation, and packaging tools</td>
+    <td rowspan="1">1.0.0</td>
+    <td rowspan="1"><a href="./plugins/skill-creator/README.md">README</a></td>
+  </tr>
 </tbody>
 </table>
 

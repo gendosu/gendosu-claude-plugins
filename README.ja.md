@@ -68,6 +68,14 @@ CCMP (Claude Code Marketplace) は、Claude Code向けの生産性向上プラ�
     <td rowspan="1">0.1.1</td>
     <td rowspan="1"><a href="./plugins/codex/README.md">README</a></td>
   </tr>
+  <tr>
+    <td rowspan="1"><strong>skill-creator</strong></td>
+    <td rowspan="1">効果的なClaude Codeスキル作成のための包括的ガイド</td>
+    <td>Skill</td>
+    <td>skill-creator - スキル設計パターン、初期化、検証、パッケージ化ツール</td>
+    <td rowspan="1">1.0.0</td>
+    <td rowspan="1"><a href="./plugins/skill-creator/README.md">README</a></td>
+  </tr>
 </tbody>
 </table>
 
