@@ -93,7 +93,7 @@ This command expects a TODO.md file with the following format:
   - Save technical patterns and reusable knowledge categorized in `/docs/memory/patterns/`
 - **Required steps after each task completion**:
   1. Commit changes (with appropriate commit message)
-     Use /commit command
+     Use /cccp:micro-commit command
   2. **Only when --no-push flag is NOT specified**: Push to remote with `git push`
   3. **Only when --no-pr flag is NOT specified**: Update PR checklist (`- [ ]` → `- [x]`)
   4. **Update file specified in $ARGUMENTS**:
