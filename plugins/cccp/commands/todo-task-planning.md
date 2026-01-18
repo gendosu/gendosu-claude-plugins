@@ -673,7 +673,7 @@ Task({
 ### Phase 4: $ARGUMENTS File Update
 
 9. **Thorough Update of $ARGUMENTS File**
-    - **🔀 Branch Creation Task (when --branch option is specified)**
+    - **🔀 Branch Creation Task (when --branch or --pr option is specified)**
       - **Add branch creation task as the FIRST task** in the task list section
       - Task format example:
         ```markdown
@@ -686,6 +686,23 @@ Task({
         ```
       - Replace `[branch_name]` with the actual branch name (specified or auto-generated)
       - Place this section before all other task phases
+    - **🔀 PR Creation Task (only when --pr option is specified)**
+      - **IMPORTANT**: Add PR creation task as the **LAST task** in the task list ONLY when `--pr` option is specified
+      - **IMPORTANT**: Do NOT add PR creation task when only `--branch` is specified
+      - Task format example:
+        ```markdown
+        ### Phase 4: PRとマージ ✅/⏳
+
+        - [ ] ✅ 4.1 PRテンプレートに従ったPR作成
+          - [ ] `.github/PULL_REQUEST_TEMPLATE.md` 読み込み
+          - [ ] PR本文作成（開発理由、開発内容、影響内容を含む）
+          - [ ] `gh pr create --title "..." --body "..."` 実行
+
+        - [ ] ⏳ 4.2 レビューとマージ
+          - [ ] チームレビュー待機
+          - [ ] 承認後マージ実行 `gh pr merge`
+        ```
+      - Do not include 📁 file references in PR creation tasks (because it's a Git operation task)
     - **Integrating Phase 0 Results**
       - Update file based on `strategic_plan.checklist_structure`
       - Include links to docs/memory:
@@ -840,7 +857,12 @@ const strategic_plan = await Task({
 
 ## 📋 Output Format Example
 
-**Note**: The following is an example. In practice, include only tasks directly necessary to achieve the objective.
+**Note**: The following is an example when `--branch` option is specified. In practice, include only tasks directly necessary to achieve the objective.
+
+**Differences by Option**:
+- **`--branch` only**: Phase 0 (Branch Creation) is added, Phase 4 (PR and Merge) is NOT added
+- **`--pr`**: Both Phase 0 (Branch Creation) and Phase 4 (PR and Merge) are added
+- **No options**: Neither Phase 0 nor Phase 4 is added
 
 ```markdown
 ## 📊 Thorough Execution Summary
