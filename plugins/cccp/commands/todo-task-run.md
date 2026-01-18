@@ -10,6 +10,10 @@ arguments:
     description: Skip pull request creation (--no-pr)
     type: boolean
     required: false
+  - name: no-push
+    description: Skip git push operations (--no-push)
+    type: boolean
+    required: false
 ---
 
 ## context
@@ -54,6 +58,8 @@ The `/cccp:todo-task-run` command is designed for **execution mode** - it takes 
 ```
 /cccp:todo-task-run TODO.md
 /cccp:todo-task-run TODO.md --no-pr
+/cccp:todo-task-run TODO.md --no-push
+/cccp:todo-task-run TODO.md --no-pr --no-push
 ```
 
 ## Processing Flow
@@ -88,7 +94,7 @@ This command expects a TODO.md file with the following format:
 - **Required steps after each task completion**:
   1. Commit changes (with appropriate commit message)
      Use /commit command
-  2. Push to remote with `git push`
+  2. **Only when --no-push flag is NOT specified**: Push to remote with `git push`
   3. **Only when --no-pr flag is NOT specified**: Update PR checklist (`- [ ]` → `- [x]`)
   4. **Update file specified in $ARGUMENTS**:
      - Change completed task from `- [ ]` to `- [x]`
@@ -125,7 +131,7 @@ When encountering errors or unexpected issues during task execution:
 
 ### Final Completion Process (Using Task Tool)
 **Required steps upon all tasks completion**:
-1. **Final push confirmation**: Confirm all changes are pushed to remote with `git push`
+1. **Only when --no-push flag is NOT specified**: **Final push confirmation** - Confirm all changes are pushed to remote with `git push`
 2. **Final update of file specified in $ARGUMENTS**:
    - Confirm all tasks are in completed state (`- [x]`)
    - Add completion date/time and overall implementation summary
