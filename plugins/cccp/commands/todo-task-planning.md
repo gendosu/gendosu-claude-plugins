@@ -322,6 +322,11 @@ Task({
        - Feasibility markers on each task (✅⏳🔍🚧)
        - File references (📁) and rationale (📊)
        - Nested subtasks (2-space indent)
+       - **Task Granularity Requirements**:
+         - Each task targets one file or one feature
+         - Tasks are completable in 30 min - 2 hours
+         - Dependencies are clearly identifiable
+         - Avoid overly broad tasks without specific targets
 
     4. **YAGNI Principle Validation**
        - Include only tasks directly necessary for the objective
@@ -462,6 +467,11 @@ Task({
    - **Required**: Concretely specify the implementation target files for each task
    - Break down complex tasks into implementation units (file units, function units)
    - Determine execution order considering dependencies (specify prerequisites)
+   - **Task Granularity Guidelines**:
+     - ✅ **One file, one feature per task**: Each task should focus on a single file or feature
+     - ✅ **Completable in 30 min - 2 hours**: Tasks should be small enough to complete in one focused session
+     - ✅ **Clear dependencies**: Dependencies between tasks must be easily identifiable
+     - ❌ **Too broad**: Avoid tasks like "implement XX feature" without specific file/function targets
 
 ### Phase 3: Thorough Question Management, User Confirmation, and Specification Recommendations
 
