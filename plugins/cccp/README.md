@@ -65,10 +65,26 @@ The `git-operations-specialist` agent provides:
 - Link pull requests to GitHub issues
 - Automatically generate PR titles and descriptions
 
-#### Todo Task Commands (`/todo-task-planning`, `/todo-task-run`)
-- Plan and organize complex tasks
-- Execute tasks with proper tracking
-- Maintain task lists and progress
+#### Todo Task Workflow
+
+This plugin provides a two-phase workflow for task management:
+
+**Phase 1: Planning (`/cccp:todo-task-planning`)**
+- Analyze requirements and convert them into actionable tasks
+- Create structured TODO.md with checkbox-based task lists
+- Use TDD methodology to break down complex requirements
+- Define clear task dependencies and priorities
+
+**Phase 2: Execution (`/cccp:todo-task-run`)**
+- Execute tasks from pre-created TODO.md file
+- Manage git operations (branch creation, commits, pushes)
+- Create and update pull requests with task progress
+- Track completion by updating checkbox status
+
+**Workflow Diagram:**
+```
+Requirements → /cccp:todo-task-planning → TODO.md → /cccp:todo-task-run → Pull Request
+```
 
 ## Usage
 
@@ -88,12 +104,15 @@ The agent is automatically invoked when you request Git-related assistance:
 Invoke any command by using the slash command syntax:
 
 ```
-/commit              # Commit staged changes
-/micro-commit        # Create fine-grained commits
-/pull-request        # Create or update pull request
-/pull-request 123    # Create PR linked to issue #123
-/todo-task-planning  # Plan tasks with todo list
-/todo-task-run       # Execute planned tasks
+/cccp:commit                           # Commit staged changes
+/cccp:micro-commit                     # Create fine-grained commits
+/cccp:pull-request                     # Create or update pull request
+/cccp:pull-request 123                 # Create PR linked to issue #123
+
+# Two-phase task workflow:
+/cccp:todo-task-planning TODO.md       # Phase 1: Plan and create TODO.md
+/cccp:todo-task-run TODO.md            # Phase 2: Execute tasks from TODO.md
+/cccp:todo-task-run TODO.md --no-pr    # Execute without creating PR
 ```
 
 ## Project Structure
