@@ -30,7 +30,7 @@ arguments:
 
 **IMPORTANT**: When completing a task, be sure to follow these steps:
 
-1. **Check task** - Change `- [ ]` to `- [x]`
+1. **Update checkbox immediately after task execution** - Change `- [ ]` to `- [x]` to mark completion
 2. **Document related files** - List names of created/modified files
 
 ## 📚 Reference Documentation
@@ -46,13 +46,13 @@ Before starting any task, read and follow `/cccp:key-guidelines`
 The `/cccp:todo-task-run` command is designed for **execution mode** - it takes a pre-existing TODO.md file and systematically executes the tasks defined within it.
 
 ### Role and Responsibility
-- **Execution**: Execute tasks from TODO.md, manage git operations, create/update pull requests
+- **Management**: Orchestrate task execution from TODO.md, manage progress, and coordinate the overall workflow
 - **Not for planning**: This command does NOT create tasks or convert requirements into actionable items
 - **Task planning**: Use `/cccp:todo-task-planning` to convert requirements into a structured TODO.md before using this command
 
 ### Relationship with todo-task-planning
 1. **Planning phase** (`/cccp:todo-task-planning`): Analyze requirements → Create TODO.md with actionable tasks
-2. **Execution phase** (this command): Read TODO.md → Execute tasks → Track progress → Create PR
+2. **Management phase** (this command): Orchestrate task execution → Manage progress → Integrate completion status → Coordinate overall workflow
 
 ### Command Invocation
 ```
@@ -82,8 +82,8 @@ This command expects a TODO.md file with the following format:
     - If an open pull request is already linked, continue implementation
 - **When --no-pr flag is specified**: Continue work on current branch as is
 
-### Task Execution (Use separate Task Tool for each process)
-- Recite the contents of `## 📋 Rules` before execution
+### Task Execution (Use the optimal Task Tool for each process)
+- Recite the contents of `## 📋 Development Rules` before execution
 - Execute each task sequentially
 - **Additional steps for investigation tasks**:
   - Create `/docs/memory/investigation-YYYY-MM-DD-{topic}.md` file at investigation start
