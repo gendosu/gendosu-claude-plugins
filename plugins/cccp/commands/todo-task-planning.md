@@ -1,11 +1,19 @@
 ---
-description: Execute task planning based on the specified file and manage questions[/cccp:todo-task-planning file_path]
+description: Execute task planning based on the specified file and manage questions[/cccp:todo-task-planning file_path --pr --branch branch_name]
 mode: plan
 arguments:
   - name: file_path
     type: string
     required: true
     description: Path to the file for task planning execution
+  - name: pr
+    type: boolean
+    required: false
+    description: Create a pull request after task completion. When specified, tasks will include branch creation (auto-generated if --branch not specified), commits, and PR creation
+  - name: branch
+    type: string
+    required: false
+    description: Branch name to create and use for task execution. Creates the specified branch and commits all changes to it. Can be used independently or with --pr option
 ---
 
 ## 🎯 Command Overview
@@ -21,6 +29,53 @@ Avoid including specifications and research results in this file as much as poss
 Also, do not excessively abbreviate research results; retain them.
 Check each time whether you have researched something in the past.
 Do not neglect checking to avoid duplicating research results and tasks.
+
+## 🔀 Branch and PR Options Usage
+
+### Option Behavior
+
+**`--branch [branch_name]` option:**
+- Creates the specified branch at the start of task execution
+- All commits during task execution will be made to this branch
+- Can be used independently without `--pr`
+- Useful when you want to work on a feature branch but don't need a PR yet
+
+**`--pr` option:**
+- Includes all `--branch` functionality (branch creation and commits)
+- Additionally creates a pull request after all tasks are completed
+- If `--branch` is not specified, a branch name will be auto-generated
+- The PR will include all changes made during task execution
+
+### Usage Examples
+
+```bash
+# Example 1: Create branch and work on it (no PR)
+/cccp:todo-task-planning docs/todos/feature-x.md --branch feature/user-auth
+
+# Example 2: Create PR with auto-generated branch name
+/cccp:todo-task-planning docs/todos/feature-x.md --pr
+
+# Example 3: Create PR with specific branch name
+/cccp:todo-task-planning docs/todos/feature-x.md --pr --branch feature/user-auth
+
+# Example 4: Basic task planning (no branch, no PR)
+/cccp:todo-task-planning docs/todos/feature-x.md
+```
+
+### Implementation Guidance
+
+When these options are specified, the task planning should include:
+
+**For `--branch` option:**
+- Task to create the specified branch at the beginning
+- All modification tasks should indicate they will be committed to this branch
+- No PR-related tasks
+
+**For `--pr` option:**
+- Task to create a branch (using specified name or auto-generated)
+- All modification tasks with commit instructions
+- Final task to create a pull request with proper description
+- PR description should summarize all changes made
 
 ## 📚 Reference Documentation
 
