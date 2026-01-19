@@ -1,0 +1,8 @@
+{
+  "name": "codex",
+  "version": "0.1.1",
+  "description": "Codex MCP integration plugin for code review, technical research, documentation generation, and custom queries",
+  "skills": [
+    "./skills/codex"
+  ]
+}

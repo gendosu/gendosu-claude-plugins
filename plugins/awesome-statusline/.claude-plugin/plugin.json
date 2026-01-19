@@ -1,0 +1,8 @@
+{
+  "name": "awesome-statusline",
+  "version": "0.1.0",
+  "description": "Claude Code statusline setup skill for automatic statusline configuration",
+  "skills": [
+    "./skills/setup-statusline"
+  ]
+}
