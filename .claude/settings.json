@@ -1,0 +1,13 @@
+{
+  "enabledPlugins": {
+    "cccp@gendosu-claude-plugins": true
+  },
+  "extraKnownMarketplaces": {
+    "gendosu-claude-plugins": {
+      "source": {
+        "source": "directory",
+        "path": "./."
+      }
+    }
+  }
+}

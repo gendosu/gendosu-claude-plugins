@@ -1,0 +1,57 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "gendosu-claude-plugins",
+  "version": "1.0.0",
+  "metadata": {
+    "description": "A collection of development utility plugins for Claude Code",
+    "pluginRoot": "./plugins"
+  },
+  "owner": {
+    "name": "GENDOSU",
+    "email": "gendosu@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "cccp",
+      "description": "Git operations specialist skill and micro-commit command for test-driven development workflows",
+      "source": "./plugins/cccp",
+      "category": "productivity",
+      "author": {
+        "name": "GENDOSU",
+        "email": "gendosu@gmail.com"
+      },
+      "homepage": "https://github.com/gendosu/gendosu-claude-plugins/tree/main/plugins/cccp",
+      "repository": "https://github.com/gendosu/gendosu-claude-plugins",
+      "license": "MIT",
+      "keywords": ["git", "commit", "workflow", "tdd", "micro-commit"]
+    },
+    {
+      "name": "awesome-statusline",
+      "description": "Claude Code statusline setup skill for automatic statusline configuration",
+      "source": "./plugins/awesome-statusline",
+      "category": "productivity",
+      "author": {
+        "name": "GENDOSU",
+        "email": "gendosu@gmail.com"
+      },
+      "homepage": "https://github.com/gendosu/gendosu-claude-plugins/tree/main/plugins/awesome-statusline",
+      "repository": "https://github.com/gendosu/gendosu-claude-plugins",
+      "license": "MIT",
+      "keywords": ["statusline", "setup", "automation", "configuration"]
+    },
+    {
+      "name": "codex",
+      "description": "Codex MCP integration for code review, technical research, documentation generation, and custom queries",
+      "source": "./plugins/codex",
+      "category": "productivity",
+      "author": {
+        "name": "GENDOSU",
+        "email": "gendosu@gmail.com"
+      },
+      "homepage": "https://github.com/gendosu/gendosu-claude-plugins/tree/main/plugins/codex",
+      "repository": "https://github.com/gendosu/gendosu-claude-plugins",
+      "license": "MIT",
+      "keywords": ["codex", "mcp", "code-review", "research", "documentation", "ai-assistant"]
+    }
+  ]
+}
