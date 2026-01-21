@@ -3581,32 +3581,1374 @@ The integration of `/cccp:micro-commit` into `todo-task-run` provides:
 
 ## Best Practices and Examples
 
-[To be completed in Phase 5]
-
 ### Complete Workflow Example
 
-[To be completed in Phase 5.1]
+This section demonstrates the complete workflow from requirements to pull request using the todo-task-planning and todo-task-run commands.
+
+#### Step 1: Create TODO.md with Requirements
+
+Create a TODO.md file with your feature requirements. Keep it simple - just describe what you want to achieve.
+
+**Example: `TODO.md`**
+```markdown
+# Add Email Notification Feature
+
+Add email notification functionality when user completes a task.
+
+## Goal
+Send email to user when they mark a task as complete.
+```
+
+#### Step 2: Run todo-task-planning Command
+
+Execute the planning command to analyze requirements and generate an actionable task list.
+
+**Command:**
+```bash
+/cccp:todo-task-planning TODO.md --pr
+```
+
+**Expected Output:**
+
+The command performs multi-agent orchestration:
+
+1. **Phase 0.2: Explore Agent** - Searches codebase for related files and patterns
+   - Finds existing mailer classes, email configurations
+   - Identifies task completion logic in controllers
+   - Discovers email-related dependencies
+
+2. **Phase 0.3: Plan Agent** - Designs implementation strategy
+   - Creates step-by-step task breakdown
+   - Defines critical files to modify
+   - Evaluates technical approaches
+
+3. **Phase 0.4: project-manager Agent** - Organizes tasks strategically
+   - Prioritizes tasks by feasibility (✅⏳🔍🚧)
+   - Extracts user questions
+   - Prepares checklist structure
+
+4. **Phase 1-5: Main Claude Executor** - Updates TODO.md
+   - Integrates agent results
+   - Adds structured task list with checkboxes
+   - Records research results in `docs/memory/`
+   - Commits changes with `/cccp:micro-commit`
+
+**Updated TODO.md after planning:**
+```markdown
+# Add Email Notification Feature
+
+Add email notification functionality when user completes a task.
+
+## Goal
+Send email to user when they mark a task as complete.
+
+## 📋 Task List
+
+### Phase 0: Branch Creation ✅
+
+- [ ] ✅ Create branch
+  - Command: `git checkout -b feature/task-completion-email`
+  - 📋 All changes will be committed to this branch
+  - Estimated time: 1 minute
+
+### Phase 1: Investigation ✅
+
+- [ ] ✅ 1.1 Investigate existing email notification patterns
+  - 📁 `docs/memory/investigation-2026-01-21-email-notifications.md`
+  - 📊 Find existing mailer classes and patterns
+  - Estimated time: 20 minutes
+
+### Phase 2: Implementation ✅
+
+- [ ] ✅ 2.1 Add task completion notification method to TaskMailer
+  - 📁 `app/mailers/task_mailer.rb`
+  - 📊 Follow existing mailer pattern from investigation
+  - Implementation: Add `task_completed(task, user)` method
+  - Estimated time: 30 minutes
+
+- [ ] ✅ 2.2 Trigger email notification in TasksController
+  - 📁 `app/controllers/tasks_controller.rb`
+  - 📊 Call mailer in update action when task is completed
+  - Implementation: Add `TaskMailer.task_completed(task, current_user).deliver_later`
+  - Estimated time: 15 minutes
+
+- [ ] ✅ 2.3 Execute cccp:micro-commit
+  - 📋 Commit implementation changes
+  - Estimated time: 2 minutes
+
+### Phase 3: Testing ✅
+
+- [ ] ✅ 3.1 Add mailer test
+  - 📁 `spec/mailers/task_mailer_spec.rb`
+  - 📊 Test email content and recipients
+  - Estimated time: 20 minutes
+
+- [ ] ✅ 3.2 Execute cccp:micro-commit
+  - 📋 Commit test changes
+  - Estimated time: 2 minutes
+
+### Phase 4: PR and Merge ✅
+
+- [ ] ✅ 4.1 Create pull request following PR template
+  - Read `.github/PULL_REQUEST_TEMPLATE.md`
+  - Create PR description (development reason, content, impact)
+  - Execute `gh pr create --title "..." --body "..."`
+  - Estimated time: 10 minutes
+
+- [ ] ⏳ 4.2 Review and merge
+  - Wait for team review
+  - Merge after approval: `gh pr merge`
+
+## 📚 Research Results
+
+- Exploration: `docs/memory/explorations/2026-01-21-email-notification-exploration.md`
+- Planning: `docs/memory/planning/2026-01-21-email-notification-plan.md`
+```
+
+#### Step 3: Run todo-task-run Command
+
+Execute the task execution command to implement all tasks.
+
+**Command:**
+```bash
+/cccp:todo-task-run TODO.md
+```
+
+**Execution Flow:**
+
+1. **Initial Setup**
+   - Read TODO.md file
+   - Execute `git fetch -a -p`
+   - Classify tasks by agent type (Git/Implementation/Investigation)
+   - Create or update pull request (branch + empty commit + PR)
+   - Initialize memory file: `docs/memory/todo-task-run-progress.md`
+
+2. **Sequential Task Execution** (using Task tool)
+
+   **Task 1: Create branch**
+   - Agent: `cccp:git-operations-specialist`
+   - Creates feature branch: `git checkout -b feature/task-completion-email`
+   - Pushes to remote: `git push -u origin feature/task-completion-email`
+   - Updates TODO.md: `- [x]` ✓
+   - Commits with `/cccp:micro-commit`
+
+   **Task 2: Investigation**
+   - Agent: `Explore`
+   - Searches for existing mailer patterns
+   - Creates investigation file: `docs/memory/investigation-2026-01-21-email-notifications.md`
+   - Documents findings: Found `UserMailer` and `OrderMailer` classes
+   - Updates TODO.md: `- [x]` ✓
+   - Commits with `/cccp:micro-commit`
+
+   **Task 3: Implement TaskMailer**
+   - Agent: general-purpose
+   - Adds `task_completed` method to `TaskMailer`
+   - Follows pattern from investigation
+   - Updates TODO.md: `- [x]` ✓
+
+   **Task 4: Trigger notification in controller**
+   - Agent: general-purpose
+   - Modifies `TasksController#update` action
+   - Adds `TaskMailer.task_completed(...).deliver_later`
+   - Updates TODO.md: `- [x]` ✓
+   - Commits with `/cccp:micro-commit`
+
+   **Task 5: Add mailer test**
+   - Agent: general-purpose
+   - Creates test file: `spec/mailers/task_mailer_spec.rb`
+   - Tests email content and recipients
+   - Updates TODO.md: `- [x]` ✓
+   - Commits with `/cccp:micro-commit`
+
+   **Task 6: Create pull request**
+   - Agent: general-purpose
+   - Uses `/cccp:pull-request` skill
+   - Generates PR description following template
+   - Executes: `gh pr create --title "..." --body "..."`
+   - Updates TODO.md: `- [x]` ✓
+
+3. **Progress Tracking Throughout Execution**
+   - After each task: TODO.md checkbox updated `- [ ]` → `- [x]`
+   - Context accumulation: Each task receives previous task results
+   - Memory updates: Progress tracked in `docs/memory/todo-task-run-progress.md`
+   - Verification gates: Each task verified before proceeding to next
+   - Forward-only commits: All changes committed with `/cccp:micro-commit`
+
+4. **Final Completion**
+   - Final push: `git push` (all commits to remote)
+   - PR update: Add completion details and summary
+   - TODO.md finalized: All tasks marked `- [x]`
+   - Completion report: Summary of all changes and files
+
+**Final TODO.md after execution:**
+```markdown
+# Add Email Notification Feature
+
+Add email notification functionality when user completes a task.
+
+## Goal
+Send email to user when they mark a task as complete.
+
+## 📋 Task List
+
+### Phase 0: Branch Creation ✅
+
+- [x] ✅ Create branch
+  - Command: `git checkout -b feature/task-completion-email`
+  - 📋 All changes will be committed to this branch
+  - Files: Branch created successfully
+  - Completed: 2026-01-21 10:05
+
+### Phase 1: Investigation ✅
+
+- [x] ✅ 1.1 Investigate existing email notification patterns
+  - Files: `docs/memory/investigation-2026-01-21-email-notifications.md`
+  - Notes: Found UserMailer and OrderMailer classes, ActionMailer configured
+  - Completed: 2026-01-21 10:15
+
+### Phase 2: Implementation ✅
+
+- [x] ✅ 2.1 Add task completion notification method to TaskMailer
+  - Files: `app/mailers/task_mailer.rb`
+  - Notes: Added task_completed method following existing pattern
+  - Completed: 2026-01-21 10:35
+
+- [x] ✅ 2.2 Trigger email notification in TasksController
+  - Files: `app/controllers/tasks_controller.rb`
+  - Notes: Added mailer call in update action with deliver_later
+  - Completed: 2026-01-21 10:45
+
+- [x] ✅ 2.3 Execute cccp:micro-commit
+  - Files: Implementation committed
+  - Completed: 2026-01-21 10:47
+
+### Phase 3: Testing ✅
+
+- [x] ✅ 3.1 Add mailer test
+  - Files: `spec/mailers/task_mailer_spec.rb`
+  - Notes: Added comprehensive test for task_completed mailer
+  - Completed: 2026-01-21 11:00
+
+- [x] ✅ 3.2 Execute cccp:micro-commit
+  - Files: Tests committed
+  - Completed: 2026-01-21 11:02
+
+### Phase 4: PR and Merge ✅
+
+- [x] ✅ 4.1 Create pull request following PR template
+  - Files: PR #123 created
+  - URL: https://github.com/org/repo/pull/123
+  - Completed: 2026-01-21 11:10
+
+- [ ] ⏳ 4.2 Review and merge
+  - Wait for team review
+  - Merge after approval: `gh pr merge`
+
+## 📚 Research Results
+
+- Exploration: `docs/memory/explorations/2026-01-21-email-notification-exploration.md`
+- Planning: `docs/memory/planning/2026-01-21-email-notification-plan.md`
+- Investigation: `docs/memory/investigation-2026-01-21-email-notifications.md`
+- Progress: `docs/memory/todo-task-run-progress.md`
+
+## ✅ Completion Summary
+
+- Total tasks: 8
+- Completed: 7
+- Pending: 1 (awaiting review)
+- Files modified: 3
+- Tests added: 1
+- Commits: 4 micro-commits
+- PR: #123
+```
 
 #### Overall Workflow Diagram
 
 ```mermaid
 graph TD
-    A[Write Requirements] --> B[Run todo-task-planning]
-    B --> C[TODO.md Generated]
-    C --> D[Review Tasks]
-    D --> E[Run todo-task-run]
-    E --> F[Tasks Executed]
-    F --> G[Pull Request Created]
-    G --> H[Code Review]
+    A[Write Requirements in TODO.md] --> B[Run /cccp:todo-task-planning]
+    B --> C{Phase 0: Multi-Agent Orchestration}
+    C --> D[Phase 0.2: Explore Agent<br/>Find files & patterns]
+    D --> E[Phase 0.3: Plan Agent<br/>Design implementation]
+    E --> F[Phase 0.4: project-manager Agent<br/>Organize tasks]
+    F --> G[Phase 1-5: Main Executor<br/>Update TODO.md]
+    G --> H[docs/memory Created<br/>explorations, planning]
+    H --> I[TODO.md Updated<br/>with task checklist]
+    I --> J[Review Tasks & Commit<br/>/cccp:micro-commit]
+    J --> K[Run /cccp:todo-task-run]
+    K --> L{Initial Setup}
+    L --> M[Create/Update PR<br/>Branch + Empty Commit]
+    M --> N[Initialize Memory<br/>todo-task-run-progress.md]
+    N --> O{Sequential Task Execution}
+    O --> P[Task 1: Git Operations<br/>cccp:git-operations-specialist]
+    P --> Q[Task 2: Investigation<br/>Explore agent]
+    Q --> R[Task 3-N: Implementation<br/>general-purpose agent]
+    R --> S{After Each Task}
+    S --> T[Commit: /cccp:micro-commit]
+    T --> U[Push: git push]
+    U --> V[Update TODO.md checkbox]
+    V --> W[Update PR description]
+    W --> X{More Tasks?}
+    X -->|Yes| O
+    X -->|No| Y[Final Completion]
+    Y --> Z[PR Ready for Review]
+    Z --> AA[Code Review & Merge]
+
+    style C fill:#e1f5ff
+    style O fill:#fff4e1
+    style S fill:#e8f5e9
+    style Y fill:#f3e5f5
 ```
+
+#### Key Workflow Characteristics
+
+**Planning Phase Features:**
+- **Multi-agent orchestration**: Explore → Plan → project-manager agents work sequentially
+- **Memory system**: Research results saved in `docs/memory/` for reuse
+- **Task validation**: Each task validated for feasibility (✅⏳🔍🚧)
+- **YAGNI compliance**: Only necessary tasks included, no premature optimization
+
+**Execution Phase Features:**
+- **Sequential execution**: Tasks executed one-by-one using Task tool
+- **Context accumulation**: Each task receives results from previous tasks
+- **Forward-only commits**: All changes committed progressively with `/cccp:micro-commit`
+- **Progress tracking**: TODO.md and memory files updated after each task
+- **Agent selection**: Appropriate agent chosen based on task type (Git/Implementation/Investigation)
+- **Verification gates**: Each task verified before proceeding to next
+
+**Quality Assurance:**
+- **Micro-commits**: Small, context-based commits following Lucas Rocha's methodology
+- **Memory preservation**: All research and investigation results documented
+- **Pull request integration**: PR created and updated throughout execution
+- **Rollback safety**: Forward-only policy ensures clean history
 
 ### Common Usage Patterns
 
-[To be completed in Phase 5.2]
+This section describes common usage patterns for todo-task-planning and todo-task-run commands, covering various scenarios and option combinations.
+
+#### Pattern 1: Branch Only (No PR)
+
+**Use Case:** You want to work on a feature branch but don't need a pull request yet.
+
+**Planning Command:**
+```bash
+/cccp:todo-task-planning TODO.md --branch
+```
+
+**What Happens:**
+- Auto-generates branch name based on TODO content (e.g., `feature/user-authentication`)
+- Adds branch creation task as **first task** in task list
+- Does **NOT** add PR creation task
+- All implementation tasks assume work will be done on the branch
+
+**When to Use:**
+- Early development stages when PR isn't ready
+- Experimental features you want to isolate
+- Working on your own without team collaboration yet
+- Want to commit progressively without creating formal PR
+
+**Execution Command:**
+```bash
+/cccp:todo-task-run TODO.md --no-pr
+```
+
+**Result:**
+- Branch created and all changes committed to it
+- No PR created
+- All commits pushed to remote branch
+- Can create PR manually later when ready
+
+---
+
+#### Pattern 2: Branch with Specific Name (No PR)
+
+**Use Case:** You have a specific branch naming convention or ticket number to follow.
+
+**Planning Command:**
+```bash
+/cccp:todo-task-planning TODO.md --branch feature/TICKET-123-user-auth
+```
+
+**What Happens:**
+- Uses your specified branch name exactly as provided
+- Adds branch creation task with your branch name
+- Does **NOT** add PR creation task
+- Validates branch name against Git naming conventions
+
+**When to Use:**
+- Following team branch naming conventions
+- Linking to specific ticket/issue numbers (e.g., JIRA, GitHub Issues)
+- Need consistent naming across multiple developers
+- Organization requires specific branch prefixes
+
+**Execution Command:**
+```bash
+/cccp:todo-task-run TODO.md --no-pr
+```
+
+**Result:**
+- Branch `feature/TICKET-123-user-auth` created
+- All changes committed to this specific branch
+- No PR created
+
+---
+
+#### Pattern 3: PR with Auto-Generated Branch
+
+**Use Case:** You want to create a complete workflow with PR, but don't care about specific branch naming.
+
+**Planning Command:**
+```bash
+/cccp:todo-task-planning TODO.md --pr
+```
+
+**What Happens:**
+- Auto-generates branch name (e.g., `feature/add-user-profile`)
+- Adds branch creation task as **first task**
+- Adds PR creation task as **last task**
+- Includes PR template integration if `.github/PULL_REQUEST_TEMPLATE.md` exists
+
+**When to Use:**
+- Complete feature development with team review
+- Want automatic branch naming based on feature description
+- Need PR for code review process
+- Standard development workflow
+
+**Execution Command:**
+```bash
+/cccp:todo-task-run TODO.md
+```
+
+**Result:**
+- Branch auto-generated and created
+- All changes committed and pushed
+- PR created with proper description following template
+- PR ready for team review
+
+---
+
+#### Pattern 4: PR with Specific Branch Name
+
+**Use Case:** You need both specific branch naming AND pull request creation.
+
+**Planning Command:**
+```bash
+/cccp:todo-task-planning TODO.md --pr --branch feature/TICKET-456-email-notif
+```
+
+**What Happens:**
+- Uses your specified branch name
+- Adds branch creation task with your branch name
+- Adds PR creation task as **last task**
+- PR will be created from your specified branch
+
+**When to Use:**
+- Team requires specific branch naming conventions
+- Need to link PR to specific tickets/issues
+- Want complete PR workflow with controlled branch name
+- Collaborative development with team standards
+
+**Execution Command:**
+```bash
+/cccp:todo-task-run TODO.md
+```
+
+**Result:**
+- Branch `feature/TICKET-456-email-notif` created
+- All changes committed and pushed to this branch
+- PR created from this specific branch
+- PR title and description follow template
+
+---
+
+#### Pattern 5: No Options (Current Branch, No PR)
+
+**Use Case:** You're already on the correct branch and just want to execute tasks without PR creation.
+
+**Planning Command:**
+```bash
+/cccp:todo-task-planning TODO.md
+```
+
+**What Happens:**
+- No branch creation task added
+- No PR creation task added
+- Tasks assume work will be done on current branch
+- Minimal workflow - just task execution
+
+**When to Use:**
+- Already working on a feature branch
+- Contributing to an existing PR
+- Local development without branch switching
+- Quick fixes or updates to current work
+
+**Execution Command:**
+```bash
+/cccp:todo-task-run TODO.md --no-pr
+```
+
+**Result:**
+- Tasks executed on current branch
+- Changes committed with `/cccp:micro-commit`
+- No branch creation, no PR creation
+- Useful for continuing existing work
+
+---
+
+#### Pattern 6: Execute Without Push (Local Development)
+
+**Use Case:** You want to execute tasks and commit locally, but not push to remote yet.
+
+**Planning Command:**
+```bash
+/cccp:todo-task-planning TODO.md --branch
+```
+
+**Execution Command:**
+```bash
+/cccp:todo-task-run TODO.md --no-pr --no-push
+```
+
+**What Happens:**
+- Branch created locally
+- Tasks executed and committed locally
+- **No push to remote** after each task
+- **No PR created**
+
+**When to Use:**
+- Offline development or slow network
+- Want to review all commits before pushing
+- Testing task execution workflow
+- Need to squash/rebase commits before pushing
+
+**Result:**
+- All work done locally with commits
+- Can push manually later: `git push -u origin [branch-name]`
+- Can review commit history before sharing
+
+---
+
+#### Pattern 7: Execute on Existing Branch Without PR
+
+**Use Case:** Continue work on an existing branch without creating a new PR.
+
+**Planning Command:**
+```bash
+/cccp:todo-task-planning TODO.md
+# Note: Already on feature/existing-feature branch
+```
+
+**Execution Command:**
+```bash
+/cccp:todo-task-run TODO.md --no-pr
+```
+
+**What Happens:**
+- No branch creation (working on current branch)
+- Tasks executed on existing branch
+- Commits added to current branch
+- Changes pushed to remote
+- No new PR created
+
+**When to Use:**
+- Adding more tasks to existing feature branch
+- Continuing development on work-in-progress PR
+- Updating existing implementation
+- Iterative development on same branch
+
+**Result:**
+- Additional commits on existing branch
+- Existing PR automatically updated (if it exists)
+- TODO.md updated with new task progress
+
+---
+
+#### Pattern Comparison Table
+
+| Pattern | Planning Command | Execution Command | Branch Created | Branch Name | PR Created | Push to Remote |
+|---------|------------------|-------------------|----------------|-------------|------------|----------------|
+| **1. Branch Only** | `--branch` | `--no-pr` | ✅ | Auto-generated | ❌ | ✅ |
+| **2. Named Branch** | `--branch NAME` | `--no-pr` | ✅ | User-specified | ❌ | ✅ |
+| **3. PR + Auto Branch** | `--pr` | (default) | ✅ | Auto-generated | ✅ | ✅ |
+| **4. PR + Named Branch** | `--pr --branch NAME` | (default) | ✅ | User-specified | ✅ | ✅ |
+| **5. No Options** | (none) | `--no-pr` | ❌ | Current branch | ❌ | ✅ |
+| **6. Local Development** | `--branch` | `--no-pr --no-push` | ✅ | Auto-generated | ❌ | ❌ |
+| **7. Existing Branch** | (none) | `--no-pr` | ❌ | Current branch | ❌ | ✅ |
+
+---
+
+#### Choosing the Right Pattern
+
+**Ask yourself:**
+
+1. **Do I need a new branch?**
+   - Yes → Use `--branch` in planning
+   - No → Omit `--branch` (work on current branch)
+
+2. **Do I need a pull request?**
+   - Yes → Use `--pr` in planning
+   - No → Use `--no-pr` in execution
+
+3. **Do I need a specific branch name?**
+   - Yes → Use `--branch [name]` in planning
+   - No → Use `--branch` (auto-generate) or omit
+
+4. **Do I want to push to remote immediately?**
+   - Yes → Default behavior
+   - No → Use `--no-push` in execution
+
+**Decision Tree:**
+
+```
+Need new branch?
+├─ Yes
+│  ├─ Specific name needed?
+│  │  ├─ Yes → --branch [name]
+│  │  └─ No → --branch (auto-generate)
+│  │
+│  └─ Need PR?
+│     ├─ Yes → Add --pr
+│     └─ No → Use --no-pr in execution
+│
+└─ No (work on current)
+   └─ Need PR?
+      ├─ Yes → --pr
+      └─ No → --no-pr in execution
+```
+
+---
+
+#### Best Practice Recommendations
+
+**For Team Collaboration:**
+- Use Pattern 4 (PR + Named Branch) with ticket numbers
+- Follow team branch naming conventions
+- Always create PRs for code review
+
+**For Personal Projects:**
+- Use Pattern 3 (PR + Auto Branch) for simplicity
+- Let system auto-generate branch names
+- Create PRs to track feature history
+
+**For Experimental Work:**
+- Use Pattern 1 or 2 (Branch Only)
+- Create branch but skip PR initially
+- Create PR manually when experiment succeeds
+
+**For Quick Fixes:**
+- Use Pattern 5 (No Options)
+- Work on current branch
+- Skip branch creation for minor changes
+
+**For Offline Development:**
+- Use Pattern 6 (Local Development)
+- Commit locally without pushing
+- Push when back online
 
 ### Troubleshooting
 
-[To be completed in Phase 5.3]
+This section addresses common issues, errors, and mistakes when using todo-task-planning and todo-task-run commands, along with solutions and recovery strategies.
+
+---
+
+#### Issue 1: Parallel Agent Execution Error
+
+**Symptom:**
+```
+Error: Plan agent failed - exploration_results undefined
+Error: Cannot read property 'summary' of undefined
+```
+
+**Root Cause:**
+Agents in Phase 0 of todo-task-planning were executed in parallel instead of sequentially. The Plan agent requires `exploration_results` from the Explore agent, but it wasn't available because both agents ran simultaneously.
+
+**Why This Happens:**
+When multiple Task tool calls are made in parallel (e.g., using `Promise.all`), the Plan agent starts before the Explore agent completes, resulting in missing dependencies.
+
+**Solution:**
+
+❌ **WRONG: Parallel Execution**
+```typescript
+// DO NOT DO THIS
+const [exploration, planning] = await Promise.all([
+  Task({ subagent_type: "Explore", ... }),
+  Task({ subagent_type: "Plan", ... })  // Plan needs exploration results!
+]);
+```
+
+✅ **CORRECT: Sequential Execution**
+```typescript
+// Wait for each agent to complete before starting next
+const exploration_results = await Task({
+  subagent_type: "Explore",
+  ...
+});
+
+// Verify exploration completed
+if (!exploration_results) {
+  throw new Error("Explore agent failed");
+}
+
+// NOW run Plan agent with exploration results
+const planning_results = await Task({
+  subagent_type: "Plan",
+  prompt: `
+    ## Context from Exploration Results
+    ${exploration_results.summary}
+    ...
+  `
+});
+
+// Verify planning completed
+if (!planning_results) {
+  throw new Error("Plan agent failed");
+}
+
+// NOW run project-manager agent
+const strategic_plan = await Task({
+  subagent_type: "cccp:project-manager",
+  prompt: `
+    ## Context
+    ${exploration_results.summary}
+    ${planning_results.approach_summary}
+    ...
+  `
+});
+```
+
+**Prevention:**
+- Always execute Phase 0 agents sequentially: Explore → Plan → project-manager
+- Verify each agent's results exist before proceeding
+- Use verification checkpoints between agents
+
+---
+
+#### Issue 2: Forward-Only Policy Violation
+
+**Symptom:**
+```
+Error: git reset is not allowed - violates forward-only policy
+Task execution stopped: Attempted to use git restore
+```
+
+**Root Cause:**
+Attempted to use `git reset`, `git restore`, `git revert`, or similar rollback commands during task execution. This violates the forward-only Git policy enforced by todo-task-run.
+
+**Why This Happens:**
+When encountering errors or mistakes, there's a temptation to "undo" changes. However, the forward-only policy requires fixing errors with new commits, not by erasing history.
+
+**Solution:**
+
+❌ **WRONG: Rollback Approach**
+```bash
+# DO NOT DO THIS
+git reset --hard HEAD~1      # Erases commit
+git restore path/to/file.rb  # Discards changes
+git revert abc123            # Creates revert commit (sometimes acceptable, but prefer forward fixes)
+```
+
+✅ **CORRECT: Forward-Only Fix**
+```bash
+# 1. Identify the error in the code
+# 2. Fix the error directly in the file
+# 3. Commit the fix with /cccp:micro-commit
+
+# Example: Fixed typo in method name
+/cccp:micro-commit
+# Result: New commit "fix: correct method name typo in UserController"
+```
+
+**Recovery Strategy:**
+1. **Identify the error**: Understand what went wrong
+2. **Fix it in place**: Modify the problematic file directly
+3. **Commit the fix**: Use `/cccp:micro-commit` to create a corrective commit
+4. **Document the fix**: Update progress memory file with what was fixed and why
+5. **Continue execution**: Resume task execution from where you stopped
+
+**Prevention:**
+- Never use rollback commands (`reset`, `restore`, `revert`)
+- Always fix forward with new commits
+- Use `/cccp:micro-commit` for all commits
+- Document fixes in memory files
+
+---
+
+#### Issue 3: Missing Memory Files
+
+**Symptom:**
+```
+Warning: docs/memory/explorations/ file not found
+Warning: No investigation results to reference
+Tasks proceeding without context
+```
+
+**Root Cause:**
+Memory files from Phase 0 (exploration, planning) or previous task execution are missing or not created properly.
+
+**Why This Happens:**
+- Phase 0 agents didn't save results to `docs/memory/`
+- File paths in prompts don't match actual file locations
+- Memory file initialization skipped in todo-task-run
+
+**Solution:**
+
+**For todo-task-planning:**
+
+1. **Verify Phase 0.2 (Explore) created files:**
+   ```bash
+   ls -la docs/memory/explorations/
+   # Should show: YYYY-MM-DD-[feature]-exploration.md
+   ```
+
+2. **Verify Phase 0.3 (Plan) created files:**
+   ```bash
+   ls -la docs/memory/planning/
+   # Should show: YYYY-MM-DD-[feature]-plan.md
+   ```
+
+3. **If missing, manually create memory directory:**
+   ```bash
+   mkdir -p docs/memory/explorations
+   mkdir -p docs/memory/planning
+   mkdir -p docs/memory/questions
+   mkdir -p docs/memory/recommendations
+   ```
+
+**For todo-task-run:**
+
+1. **Verify progress file initialization:**
+   ```bash
+   ls -la docs/memory/todo-task-run-progress.md
+   # Should be created at start of task execution
+   ```
+
+2. **If missing, ensure Initial Setup phase completed:**
+   - Check Task tool execution logs
+   - Verify memory file initialization step
+   - Manually create if necessary
+
+**Recovery Strategy:**
+1. Check if memory files exist in expected locations
+2. If missing, re-run todo-task-planning to regenerate
+3. If todo-task-run is in progress, create progress file manually
+4. Document any manual interventions
+
+**Prevention:**
+- Always verify memory files after Phase 0 completion
+- Check file paths match between agent prompts and actual files
+- Include memory file verification in workflow checklist
+
+---
+
+#### Issue 4: Task Execution Stuck or Blocked
+
+**Symptom:**
+```
+Task 3: 🚧 BLOCKED - Cannot proceed
+Dependencies not met: Task 2 incomplete
+Waiting for user input but no question asked
+```
+
+**Root Cause:**
+Task execution cannot proceed due to:
+- Blocker marked in TODO.md (🚧)
+- Missing dependencies from previous tasks
+- Unclear specifications without user clarification
+
+**Why This Happens:**
+- Task depends on another task that failed
+- Specifications are ambiguous and need user input
+- Technical blocker discovered during execution
+
+**Solution:**
+
+**For Dependency Blockers:**
+
+1. **Check previous task status:**
+   ```markdown
+   - [x] Task 2: Database migration ✅ (should be completed)
+   - [ ] Task 3: Add API endpoint 🚧 (blocked waiting for Task 2)
+   ```
+
+2. **Verify previous task actually completed:**
+   - Check TODO.md for `- [x]` checkbox
+   - Check memory file for task completion notes
+   - Verify files were actually created/modified
+
+3. **If previous task incomplete, complete it first:**
+   - Re-run the blocking task
+   - Mark as complete in TODO.md
+   - Update memory files
+
+**For Specification Blockers:**
+
+1. **Identify unclear specifications:**
+   ```markdown
+   - [ ] 🚧 Add email notification feature
+     - Blocker: Email provider not decided (SendGrid vs AWS SES)
+   ```
+
+2. **Ask user for clarification:**
+   - Use AskUserQuestion tool with clear options
+   - Present technical trade-offs
+   - Document decision in memory files
+
+3. **After clarification, update TODO.md:**
+   ```markdown
+   - [ ] ✅ Add email notification feature
+     - Decision: Using SendGrid (user preference)
+     - Files: app/mailers/notification_mailer.rb
+   ```
+
+**For Technical Blockers:**
+
+1. **Document the blocker:**
+   - Record in `docs/memory/todo-task-run-progress.md`
+   - Explain technical constraint
+   - Propose potential solutions
+
+2. **Investigate solutions:**
+   - Use Explore agent to research approaches
+   - Check existing codebase patterns
+   - Consult documentation
+
+3. **Implement workaround or solution:**
+   - Apply fix with new commits
+   - Update task status from 🚧 to ✅
+   - Continue execution
+
+**Prevention:**
+- Plan tasks with clear dependencies
+- Use Phase 0 planning to identify blockers early
+- Ask clarifying questions during planning phase
+- Mark tasks with appropriate feasibility indicators (✅⏳🔍🚧)
+
+---
+
+#### Issue 5: PR Creation Failed
+
+**Symptom:**
+```
+Error: gh pr create failed
+Error: No commits between main and feature/user-auth
+Error: Pull request already exists for this branch
+```
+
+**Root Cause:**
+Pull request creation failed due to:
+- No commits on branch (empty PR)
+- PR already exists for the branch
+- Network issues or GitHub API errors
+
+**Why This Happens:**
+- Branch created but no changes committed yet
+- Previous PR execution was interrupted
+- Attempting to create duplicate PR
+
+**Solution:**
+
+**For Empty Branch Error:**
+
+1. **Verify commits exist:**
+   ```bash
+   git log origin/main..HEAD
+   # Should show commits on current branch
+   ```
+
+2. **If no commits, create initial commit:**
+   ```bash
+   # todo-task-run should handle this automatically via /cccp:pull-request skill
+   # The skill creates an empty commit if needed
+   ```
+
+3. **If using --no-pr flag, this is expected:**
+   - Remove `--no-pr` flag to enable PR creation
+   - Or manually create PR after commits: `gh pr create`
+
+**For Duplicate PR Error:**
+
+1. **Check existing PR:**
+   ```bash
+   gh pr list --head feature/user-auth
+   # Shows existing PR for this branch
+   ```
+
+2. **If PR exists, update it instead:**
+   - Continue work on same branch
+   - New commits automatically update existing PR
+   - Use `/cccp:pull-request` skill to update PR description
+
+3. **If you want new PR, use different branch:**
+   - Create new branch with different name
+   - Re-run todo-task-planning with new branch name
+
+**For GitHub API Errors:**
+
+1. **Verify GitHub CLI authentication:**
+   ```bash
+   gh auth status
+   # Should show: Logged in to github.com as [username]
+   ```
+
+2. **If not authenticated, login:**
+   ```bash
+   gh auth login
+   ```
+
+3. **Check network connectivity:**
+   ```bash
+   ping github.com
+   ```
+
+**Prevention:**
+- Let todo-task-run handle PR creation automatically
+- Don't create PRs manually when using --pr flag
+- Verify GitHub CLI is configured before execution
+- Use --no-pr flag if PR creation should be skipped
+
+---
+
+#### Issue 6: Commit Message Generation Failed
+
+**Symptom:**
+```
+Error: /cccp:micro-commit failed to generate commit message
+Warning: No staged changes to commit
+Commit aborted: Cannot determine context
+```
+
+**Root Cause:**
+Micro-commit skill couldn't generate appropriate commit message due to:
+- No staged changes
+- Changes too diverse to group logically
+- Unable to determine commit context
+
+**Why This Happens:**
+- Files not staged: `git add` not executed
+- Too many unrelated changes in staging area
+- Micro-commit skill needs clear, focused changes
+
+**Solution:**
+
+**For No Staged Changes:**
+
+1. **Verify files modified:**
+   ```bash
+   git status
+   # Should show modified files
+   ```
+
+2. **Stage changes before commit:**
+   ```bash
+   git add path/to/modified/file.rb
+   # Then run /cccp:micro-commit
+   ```
+
+3. **If using todo-task-run, this should be automatic:**
+   - Task execution should stage changes
+   - Verify task completed successfully
+   - Check task logs for errors
+
+**For Too Diverse Changes:**
+
+1. **Review staged changes:**
+   ```bash
+   git diff --staged
+   # Check what's staged
+   ```
+
+2. **Unstage unrelated changes:**
+   ```bash
+   git reset path/to/unrelated/file.rb
+   # Keep only related changes staged
+   ```
+
+3. **Commit related changes together:**
+   ```bash
+   /cccp:micro-commit
+   # Creates commit for focused set of changes
+   ```
+
+4. **Repeat for other changes:**
+   ```bash
+   git add path/to/other/changes.rb
+   /cccp:micro-commit
+   # Separate commit for different context
+   ```
+
+**Prevention:**
+- Keep changes focused and related
+- Let /cccp:micro-commit handle grouping
+- Don't manually stage too many diverse files
+- Follow one change per commit principle
+
+---
+
+#### Issue 7: Memory File Accumulation
+
+**Symptom:**
+```
+Warning: docs/memory/ directory growing large (100+ files)
+Performance: Slow memory file reading
+Confusion: Which investigation file is relevant?
+```
+
+**Root Cause:**
+Over time, `docs/memory/` accumulates many exploration, planning, and investigation files, making it hard to find relevant information.
+
+**Why This Happens:**
+- Each planning session creates new memory files
+- Multiple features investigated over time
+- No cleanup or archival process
+
+**Solution:**
+
+**Organize by Feature/Date:**
+
+1. **Create subdirectories:**
+   ```bash
+   mkdir -p docs/memory/explorations/2026-01
+   mkdir -p docs/memory/planning/2026-01
+   mkdir -p docs/memory/archive
+   ```
+
+2. **Move old files to archive:**
+   ```bash
+   # Move completed feature memory files
+   mv docs/memory/explorations/2025-12-* docs/memory/archive/
+   mv docs/memory/planning/2025-12-* docs/memory/archive/
+   ```
+
+**Create Index File:**
+
+1. **Create memory index:**
+   ```bash
+   touch docs/memory/INDEX.md
+   ```
+
+2. **Document each memory file:**
+   ```markdown
+   # Memory Files Index
+
+   ## Active Investigations
+   - `explorations/2026-01-21-email-notification-exploration.md` - Email notification feature
+   - `planning/2026-01-21-email-notification-plan.md` - Email notification implementation plan
+
+   ## Archived
+   - `archive/explorations/2025-12-15-user-auth-exploration.md` - User authentication (completed)
+   ```
+
+**Link Related Files:**
+
+1. **Add references in TODO.md:**
+   ```markdown
+   ## 📚 Research Results
+   - Exploration: `docs/memory/explorations/2026-01-21-email-notification-exploration.md`
+   - Planning: `docs/memory/planning/2026-01-21-email-notification-plan.md`
+   - Related: See INDEX.md for full list
+   ```
+
+**Prevention:**
+- Create index files for large projects
+- Archive completed feature memory files
+- Use consistent naming: `YYYY-MM-DD-feature-type.md`
+- Organize by date or feature subdirectories
+
+---
+
+#### Issue 8: Task Granularity Too Broad or Too Narrow
+
+**Symptom:**
+```
+Task taking 4+ hours to complete (too broad)
+10+ tasks for simple feature (too narrow)
+Tasks have unclear scope or multiple responsibilities
+```
+
+**Root Cause:**
+Tasks are not properly sized - either too large (violating 30min-2hr guideline) or too small (creating unnecessary overhead).
+
+**Why This Happens:**
+- Planning didn't break down complex tasks enough
+- Over-engineering with excessive task splits
+- Lack of clear task boundaries
+
+**Solution:**
+
+**For Too Broad Tasks:**
+
+❌ **TOO BROAD:**
+```markdown
+- [ ] Implement user authentication feature
+  # This could take days! Too broad.
+```
+
+✅ **PROPERLY GRANULAR:**
+```markdown
+- [ ] Add User model with password digest column
+  # ~30 min, one file: app/models/user.rb
+
+- [ ] Implement login endpoint in SessionsController
+  # ~45 min, one file: app/controllers/sessions_controller.rb
+
+- [ ] Add authentication middleware
+  # ~30 min, one file: app/middleware/authenticate.rb
+
+- [ ] Create login form component
+  # ~1 hr, one file: components/LoginForm.vue
+```
+
+**For Too Narrow Tasks:**
+
+❌ **TOO NARROW:**
+```markdown
+- [ ] Import User model
+- [ ] Add password_digest field
+- [ ] Add has_secure_password
+- [ ] Add validation for email
+- [ ] Add validation for password
+- [ ] Add uniqueness validation for email
+  # These are all part of one logical unit - overkill!
+```
+
+✅ **PROPERLY COMBINED:**
+```markdown
+- [ ] Configure User model with authentication
+  # ~30 min, one file: app/models/user.rb
+  # Includes: password_digest, has_secure_password, validations
+```
+
+**Granularity Guidelines:**
+
+**✅ Good Task Characteristics:**
+- Targets one file or one feature
+- Completable in 30 minutes to 2 hours
+- Has clear deliverable
+- Dependencies are obvious
+- Can be verified independently
+
+**❌ Bad Task Characteristics:**
+- Affects many unrelated files
+- Takes more than 2 hours
+- Unclear what "done" means
+- Too many dependencies
+- Cannot be tested independently
+
+**Prevention:**
+- Follow YAGNI during planning (only necessary tasks)
+- Use task granularity checklist during Phase 0.4
+- Break tasks at file or feature boundaries
+- Aim for 30min-2hr estimation per task
+
+---
+
+#### Issue 9: YAGNI Violations
+
+**Symptom:**
+```
+TODO.md contains 30+ tasks for simple feature
+Tasks include "Add comprehensive logging"
+Tasks include "Refactor existing code"
+Tasks include "Optimize performance"
+```
+
+**Root Cause:**
+Task planning included unnecessary tasks that violate YAGNI (You Aren't Gonna Need It) principle - tasks that improve existing code rather than implementing required features.
+
+**Why This Happens:**
+- Over-planning during Phase 0
+- Including "nice to have" improvements
+- Perfectionism in task breakdown
+
+**Solution:**
+
+**Review Tasks Against YAGNI Checklist:**
+
+❌ **YAGNI VIOLATIONS (Remove These):**
+```markdown
+- [ ] Refactor UserController to use service objects  # Improving existing code
+- [ ] Add comprehensive error logging  # Not required for feature
+- [ ] Optimize database queries  # Premature optimization
+- [ ] Add integration tests for existing features  # Supplementing existing
+- [ ] Update documentation for old features  # Not necessary for new feature
+```
+
+✅ **YAGNI COMPLIANT (Keep These):**
+```markdown
+- [ ] Add email notification method to TaskMailer  # Required for feature
+- [ ] Trigger notification in TasksController  # Required for feature
+- [ ] Add test for new notification mailer  # Testing new code
+```
+
+**YAGNI Validation Questions:**
+
+Ask for each task:
+1. **Is this directly required for the feature?** If no → Remove
+2. **Does this improve existing code?** If yes → Remove
+3. **Would the feature work without this?** If yes → Remove
+4. **Is this premature optimization?** If yes → Remove
+
+**When YAGNI Can Be Broken:**
+
+Only include these if **explicitly requested** in requirements:
+- Tests for new code (not existing code)
+- Error handling for new features (not existing features)
+- Documentation for new APIs (not existing APIs)
+- Security measures essential for new feature
+
+**Prevention:**
+- Use YAGNI validation during Phase 0.4 (project-manager)
+- Focus only on feature requirements
+- Resist temptation to "improve while we're here"
+- Create separate TODO for refactoring if needed later
+
+---
+
+#### Quick Troubleshooting Checklist
+
+When encountering any issue, check:
+
+- [ ] **Agents executed sequentially?** (Explore → Plan → project-manager)
+- [ ] **Memory files created?** (`docs/memory/explorations/`, `docs/memory/planning/`)
+- [ ] **Forward-only policy followed?** (No `git reset`, `git restore`)
+- [ ] **Tasks properly granular?** (30min-2hr, one file/feature per task)
+- [ ] **YAGNI compliance?** (No refactoring, optimization, or perfection tasks)
+- [ ] **Dependencies clear?** (Previous tasks completed before proceeding)
+- [ ] **GitHub CLI authenticated?** (`gh auth status`)
+- [ ] **Changes staged before commit?** (`git status`)
+- [ ] **Memory files indexed?** (Easy to find relevant research)
+
+---
+
+#### Getting Help
+
+If issues persist after troubleshooting:
+
+1. **Check command documentation:**
+   - [todo-task-planning.md](commands/todo-task-planning.md)
+   - [todo-task-run.md](commands/todo-task-run.md)
+   - [CCCP README](README.md)
+
+2. **Review memory files:**
+   - Check `docs/memory/todo-task-run-progress.md` for execution history
+   - Review exploration and planning files for context
+
+3. **Examine git history:**
+   ```bash
+   git log --oneline -10
+   # Review recent micro-commits for clues
+   ```
+
+4. **Inspect TODO.md state:**
+   - Verify checkbox states (`- [ ]` vs `- [x]`)
+   - Check for blocker markers (🚧)
+   - Review task dependencies
+
+5. **Report issue:**
+   - Include TODO.md content
+   - Share memory file paths
+   - Provide git log output
+   - Describe expected vs actual behavior
 
 ## Appendix
 
