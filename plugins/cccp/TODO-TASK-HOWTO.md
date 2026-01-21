@@ -1939,33 +1939,1645 @@ This workflow demonstrates the power of Phase 0 multi-agent orchestration, resul
 
 ## Using todo-task-run Command
 
-[To be completed in Phase 4]
+The `todo-task-run` command is the **execution phase** of the TODO task workflow. While `todo-task-planning` converts requirements into actionable tasks, `todo-task-run` takes those tasks and systematically executes them, managing the entire implementation lifecycle from start to finish.
 
 ### Command Overview
 
-[To be completed in Phase 4.1]
+The `todo-task-run` command serves as the **orchestration manager** for task execution. It doesn't just run tasks—it coordinates the workflow, manages Git operations, tracks progress, and creates pull requests.
 
-#### Workflow Diagram
+#### Role and Responsibility
+
+The command acts as an **execution orchestrator** with these core responsibilities:
+
+**1. Task Execution Management**
+- Reads TODO.md file and identifies incomplete tasks (`- [ ]`)
+- Executes tasks sequentially, passing context between tasks
+- Updates task status (`- [ ]` → `- [x]`) as work progresses
+- Tracks progress and manages dependencies
+
+**2. Git Workflow Automation**
+- Creates or updates pull requests (unless `--no-pr` flag is used)
+- Manages branch operations through specialized Git agent
+- Commits changes using `/cccp:micro-commit` skill
+- Pushes to remote repository (unless `--no-push` flag is used)
+
+**3. Progress Tracking and Context Accumulation**
+- Maintains memory files in `docs/memory/` for cross-task context
+- Records implementation decisions and blockers
+- Passes results from completed tasks to subsequent tasks
+- Provides complete audit trail of execution
+
+**What This Command DOES:**
+- ✅ Orchestrate task execution from pre-existing TODO.md
+- ✅ Manage Git operations (branch, commit, push, PR)
+- ✅ Track progress and update TODO.md with completion status
+- ✅ Coordinate multiple agent types (Explore, general-purpose, Git specialist)
+- ✅ Accumulate context across tasks for informed decision-making
+
+**What This Command DOES NOT DO:**
+- ❌ Create tasks or convert requirements into TODO.md (use `todo-task-planning` for that)
+- ❌ Analyze requirements or design implementation strategy
+- ❌ Run Phase 0 multi-agent orchestration (that's planning phase)
+
+#### Difference from todo-task-planning
+
+The two commands work together as complementary phases of a complete workflow:
+
+| Aspect | todo-task-planning | todo-task-run |
+|--------|-------------------|---------------|
+| **Phase** | Planning | Execution |
+| **Input** | High-level requirements or existing TODO.md | Pre-created TODO.md with actionable tasks |
+| **Output** | Structured TODO.md with tasks | Completed implementation + Pull Request |
+| **Multi-Agent** | Yes (Explore → Plan → project-manager) | Yes (Explore/General/Git agents per task) |
+| **Creates Tasks** | Yes | No |
+| **Executes Tasks** | No | Yes |
+| **Git Operations** | Adds Git tasks to TODO.md | Executes actual Git commands |
+| **PR Creation** | Adds PR creation task | Creates/updates actual PR |
+| **Repeatable** | Yes (refine plan) | Yes (resume after errors) |
+
+**When to Use Which:**
+
+```
+Use todo-task-planning when:
+- You have requirements but no TODO.md yet
+- You want to analyze feasibility and break down complex work
+- You need to update existing TODO.md with new requirements
+- You want multi-agent exploration and planning
+
+Use todo-task-run when:
+- You have a TODO.md with well-defined tasks
+- You're ready to execute implementation
+- You want automated Git workflow management
+- You want systematic task-by-task execution with context passing
+```
+
+#### Relationship: Planning → Execution
+
+The two commands form a **sequential workflow**:
 
 ```mermaid
-graph LR
-    A[todo-task-planning] --> B[TODO.md Created]
-    B --> C[todo-task-run]
-    C --> D[Task Execution]
-    D --> E[Pull Request]
+graph TD
+    A[Requirements/Ideas] --> B[todo-task-planning]
+    B --> C{TODO.md Ready?}
+    C -->|Yes| D[todo-task-run]
+    C -->|No| E[Answer Questions]
+    E --> B
+    D --> F[Task Execution]
+    F --> G{All Tasks Complete?}
+    G -->|Yes| H[Pull Request Created]
+    G -->|No - Error/Blocker| I[Fix Issue]
+    I --> D
+    H --> J[Code Review]
+
+    style B fill:#e1f5ff
+    style D fill:#e1f5ff
+    style H fill:#d4edda
 ```
+
+**Workflow Explanation:**
+
+1. **Requirements/Ideas** - Start with what you want to build
+2. **todo-task-planning** - Analyze, explore codebase, create structured tasks
+3. **TODO.md Ready?** - Check if all questions are answered and tasks are clear
+4. **Answer Questions** - If blocked, resolve specification questions
+5. **todo-task-run** - Execute tasks systematically
+6. **Task Execution** - Implement, commit, push for each task
+7. **All Tasks Complete?** - Check if work is finished or blocked
+8. **Fix Issue** - If error occurs, fix and re-run (forward-only policy)
+9. **Pull Request Created** - Automated PR creation with completion details
+10. **Code Review** - Team reviews and merges
+
+**Key Insight:** Both commands are **repeatable**. If execution is interrupted or errors occur, you can re-run `todo-task-run` to resume. It will skip completed tasks and continue from where it left off.
+
+#### Command Syntax
+
+```bash
+/cccp:todo-task-run <file_path> [--no-pr] [--no-push]
+```
+
+**Parameters:**
+- `<file_path>` (required) - Path to TODO.md file with tasks to execute
+- `--no-pr` (optional) - Skip pull request creation/update
+- `--no-push` (optional) - Skip git push operations to remote
+
+**Examples:**
+
+```bash
+# Standard execution with full Git workflow
+/cccp:todo-task-run TODO.md
+
+# Execute tasks but don't create/update pull request
+/cccp:todo-task-run TODO.md --no-pr
+
+# Execute tasks but don't push to remote (local commits only)
+/cccp:todo-task-run TODO.md --no-push
+
+# Execute tasks with no Git remote operations
+/cccp:todo-task-run TODO.md --no-pr --no-push
+```
+
+See the "Options: --no-pr and --no-push" section for detailed explanation of these flags.
 
 ### Processing Flow
 
-[To be completed in Phase 4.2]
+The `todo-task-run` command follows a structured execution flow with four main phases: Initial Setup, Task Execution Loop, Error Handling, and Final Completion. Understanding this flow helps you anticipate what the command will do and how to respond to errors.
+
+#### Phase 1: Initial Setup
+
+Before executing any tasks, the command performs essential setup operations:
+
+**1. Read and Parse TODO.md**
+```typescript
+// Read the specified TODO file
+const todoContent = await Read({ file_path: $ARGUMENTS });
+
+// Parse tasks and extract metadata
+const tasks = parseTasks(todoContent);
+const incompleteTasks = tasks.filter(t => t.status === "incomplete");
+
+console.log(`Found ${incompleteTasks.length} incomplete tasks to execute`);
+```
+
+**2. Execute Git Fetch**
+```bash
+git fetch -a -p
+```
+- Fetches all remote branches and prunes deleted references
+- Ensures local Git state is synchronized with remote
+- Required before any Git operations
+
+**3. Classify Tasks by Agent Type**
+
+The command analyzes each task description and determines which agent should handle it:
+
+| Task Pattern | Agent Type | Examples |
+|--------------|------------|----------|
+| Git operations (commit, push, branch, PR) | `cccp:git-operations-specialist` | "Create feature branch", "Commit changes", "Push to remote" |
+| Investigation (explore, research, find) | `Explore` | "Investigate codebase", "Research email service options" |
+| Implementation (implement, add, create, update) | `general-purpose` | "Add login endpoint", "Create User model", "Update configuration" |
+
+**Classification Logic:**
+```typescript
+function classifyTask(taskDescription: string): AgentType {
+  const keywords = {
+    git: ['commit', 'push', 'branch', 'merge', 'pr', 'pull request'],
+    explore: ['investigate', 'explore', 'research', 'find', 'analyze'],
+    implement: ['implement', 'add', 'create', 'update', 'modify', 'build']
+  };
+
+  if (keywords.git.some(kw => taskDescription.toLowerCase().includes(kw))) {
+    return 'cccp:git-operations-specialist';
+  } else if (keywords.explore.some(kw => taskDescription.toLowerCase().includes(kw))) {
+    return 'Explore';
+  } else {
+    return 'general-purpose'; // Default for implementation tasks
+  }
+}
+```
+
+**4. Pull Request Creation (unless `--no-pr` flag is used)**
+
+If the `--no-pr` flag is **NOT** specified, the command creates or updates a pull request:
+
+```typescript
+if (!flags.includes('--no-pr')) {
+  // Use /cccp:pull-request skill
+  await Skill({
+    skill: 'cccp:pull-request',
+    args: '' // No issue number, PR will be created for current branch
+  });
+
+  // The skill handles:
+  // - Branch creation if not on feature branch
+  // - Empty initial commit (if needed)
+  // - PR creation with template
+  // - Linking to existing PR if already open
+}
+```
+
+**What Happens:**
+- If you're on `main` branch, a new feature branch is created automatically
+- An empty commit is made to enable PR creation
+- Pull request is created using `.github/PULL_REQUEST_TEMPLATE.md` template
+- If a PR already exists for the branch, it's linked (no duplicate PR created)
+
+**If `--no-pr` flag is specified:**
+- Skips PR creation entirely
+- Continues work on current branch
+- You're responsible for creating PR manually later
+
+**5. Initialize Memory System**
+
+The command sets up memory files for context tracking:
+
+```typescript
+// Create progress tracking file
+const progressFile = 'docs/memory/todo-task-run-progress.md';
+await Write({
+  file_path: progressFile,
+  content: `# Task Execution Progress - ${new Date().toISOString()}
+
+## Overview
+Executing tasks from: ${$ARGUMENTS}
+Total tasks: ${incompleteTasks.length}
+
+## Execution Log
+(Tasks will be logged here as they execute)
+`
+});
+
+// Initialize context accumulation variables
+TASK_CONTEXT = {};
+MEMORY_FILES = {
+  progress: progressFile,
+  planning: findMemoryFile('docs/memory/planning/*.md'),
+  exploration: findMemoryFile('docs/memory/explorations/*.md')
+};
+INVESTIGATION_FINDINGS = [];
+```
+
+**After Initial Setup:**
+- [ ] TODO.md file is loaded and parsed
+- [ ] Git state is synchronized with remote
+- [ ] All tasks are classified by agent type
+- [ ] Pull request is created (or skipped if `--no-pr`)
+- [ ] Memory system is initialized
+
+The command is now ready to begin task execution.
+
+#### Phase 2: Task Execution Loop
+
+Tasks are executed **sequentially** using the Task tool. Each task receives context from previous tasks, creating a continuous flow of information.
+
+**Sequential Execution Pattern:**
+
+```typescript
+// Task 1
+const task_1_result = await Task({
+  subagent_type: "Explore", // Determined in classification
+  description: "Execute task 1: Investigate authentication patterns",
+  prompt: `
+    ## Task Context
+    Task 1 of 8: Investigate authentication patterns
+    Target File: ${$ARGUMENTS}
+
+    ## Previous Task Results
+    This is the first task - no previous results
+
+    ## Memory Files
+    - Progress: ${MEMORY_FILES.progress}
+    - Planning: ${MEMORY_FILES.planning}
+
+    [... detailed task instructions ...]
+  `
+});
+
+// ⚠️ WAIT for task_1 to complete, THEN proceed
+
+// Task 2
+const task_2_result = await Task({
+  subagent_type: "general-purpose",
+  description: "Execute task 2: Implement login endpoint",
+  prompt: `
+    ## Task Context
+    Task 2 of 8: Implement login endpoint
+    Target File: ${$ARGUMENTS}
+
+    ## Previous Task Results
+    ${task_1_result.summary}
+    Files discovered: ${task_1_result.files_modified.join(', ')}
+    Key findings: ${task_1_result.key_findings}
+
+    ## Memory Files
+    - Progress: ${MEMORY_FILES.progress}
+    - Exploration: ${task_1_result.investigation_file}
+
+    [... detailed task instructions ...]
+  `
+});
+
+// ⚠️ WAIT for task_2 to complete, THEN proceed
+
+// Task 3 (and so on...)
+```
+
+**For Each Task, the Command:**
+
+1. **Determines Agent Type** (from classification in Phase 1)
+2. **Constructs Prompt** with:
+   - Current task description and context
+   - Results from previous tasks
+   - Memory file references
+   - Task-specific instructions based on agent type
+3. **Executes Task** using Task tool
+4. **Verifies Completion** (see verification gates below)
+5. **Updates TODO.md** - Changes `- [ ]` to `- [x]`
+6. **Commits Changes** - Uses `/cccp:micro-commit` skill
+7. **Pushes to Remote** (unless `--no-push` flag is used)
+8. **Updates Progress Memory** - Records completion in `docs/memory/todo-task-run-progress.md`
+9. **Stores Result** - Saves result for next task's context
+
+**Verification Gates:**
+
+After each task execution, the command verifies success:
+
+```typescript
+const task_N_result = await Task({ ... });
+
+// Verification gate
+if (!task_N_result) {
+  throw new Error('Task N returned no result');
+}
+
+if (task_N_result.blockers) {
+  // Mark task as blocked in TODO.md
+  await updateTodoStatus(taskId, '🚧', task_N_result.blockers);
+
+  // Record blocker in progress memory
+  await appendToProgressFile(`
+## Task ${taskId} - BLOCKED
+- Blocker: ${task_N_result.blockers}
+- Attempted solutions: ${task_N_result.attempted_solutions}
+- Next steps: Fix with new commit, not rollback
+  `);
+
+  // Stop execution and report to user
+  throw new Error(`Task ${taskId} blocked: ${task_N_result.blockers}`);
+}
+
+// Verify expected outputs exist
+if (!task_N_result.summary || !task_N_result.files_modified) {
+  console.warn('Task completed but missing expected output format');
+  // Continue execution (non-critical warning)
+}
+
+// ✅ Verification passed, proceed to next task
+```
+
+**Context Accumulation:**
+
+Each task's results are passed to subsequent tasks:
+
+```typescript
+// Task N provides context to Task N+1
+const task_N_plus_1_result = await Task({
+  subagent_type: determineAgent(taskN_plus_1),
+  description: taskN_plus_1.description,
+  prompt: `
+    ## Previous Task Results
+    ${task_N_result.summary}
+
+    Files modified: ${task_N_result.files_modified.join(', ')}
+    Key findings: ${task_N_result.key_findings}
+
+    ## Accumulated Context
+    ${TASK_CONTEXT[taskN_minus_1]?.summary || ''}
+
+    [... rest of prompt ...]
+  `
+});
+
+// Store result for future tasks
+TASK_CONTEXT[taskN_plus_1] = task_N_plus_1_result;
+```
+
+**Loop Continues Until:**
+- ✅ All tasks are marked `- [x]` (completed), OR
+- 🚧 A task is blocked (execution stops, user must intervene)
+
+#### Phase 3: Error Handling Workflow
+
+When a task encounters an error or blocker, the command follows a **forward-only error recovery policy**.
+
+**CRITICAL - Forward-Only Error Recovery:**
+
+**❌ NEVER use these commands:**
+- `git reset` - No rollbacks
+- `git restore` - No undoing changes
+- `git revert` - No commit reversal
+
+**✅ ALWAYS fix forward:**
+- Create new commits to fix errors
+- Keep complete history transparent
+- Document fixes in progress memory
+
+**Error Recovery Steps:**
+
+**1. Detect Error**
+```typescript
+const task_N_result = await Task({ ... });
+
+if (task_N_result.blockers) {
+  // Error detected - begin recovery protocol
+}
+```
+
+**2. Mark Task Status in TODO.md**
+```markdown
+- [ ] 🚧 Task N: Implement feature X (BLOCKED: API endpoint returns 500 error)
+```
+
+**3. Record in Progress Memory**
+```markdown
+## Task N - BLOCKED
+
+**Blocker:** API endpoint `/api/auth/login` returns 500 error when testing
+**Attempted Solutions:**
+- Checked endpoint implementation - found missing error handling
+- Verified database connection - connection is stable
+
+**Root Cause:** Missing try-catch block in login handler
+
+**Recovery Approach:**
+- Add error handling to login endpoint (NEW commit, not rollback)
+- Test endpoint again
+- Update TODO.md with resolution
+
+**Next Steps:**
+1. Create fix in new commit
+2. Test locally
+3. Mark task as complete after verification
+```
+
+**4. Report to User**
+
+The command provides clear output:
+```
+⚠️ Task 5 Blocked
+
+Blocker Details:
+- Task: Implement login endpoint
+- Error: API returns 500 error during testing
+- Impact: Cannot proceed to Task 6 (frontend integration)
+
+Recommended Resolution:
+1. Fix error handling in login endpoint
+2. Create new commit with fix (DO NOT use git reset)
+3. Re-run /cccp:todo-task-run TODO.md to resume
+
+The command will skip completed tasks and continue from Task 5.
+```
+
+**5. STOP Execution**
+
+The command halts and waits for user intervention:
+- DO NOT proceed to next task
+- DO NOT attempt automatic rollback
+- Wait for user to fix the issue
+
+**6. User Fixes Issue**
+
+User creates a forward-only fix:
+```bash
+# User manually fixes the code
+# Commits the fix
+/cccp:micro-commit
+
+# Re-runs todo-task-run to resume
+/cccp:todo-task-run TODO.md
+```
+
+**7. Command Resumes**
+
+On re-run, the command:
+- Reads TODO.md and identifies last completed task
+- Skips all `- [x]` completed tasks
+- Resumes from first `- [ ]` incomplete task
+- Continues execution with accumulated context intact
+
+**Error Recovery Example:**
+
+```
+Initial Run:
+✅ Task 1: Complete
+✅ Task 2: Complete
+✅ Task 3: Complete
+🚧 Task 4: Blocked (database migration failed)
+⏸️  Execution stopped
+
+User fixes migration:
+- Corrects migration SQL syntax
+- Commits fix with /cccp:micro-commit
+- Runs migration manually: npm run migrate:up
+
+Re-run:
+⏭️  Task 1: Skipped (already complete)
+⏭️  Task 2: Skipped (already complete)
+⏭️  Task 3: Skipped (already complete)
+✅ Task 4: Complete (retry succeeded)
+✅ Task 5: Complete
+... execution continues
+```
+
+#### Phase 4: Final Completion Process
+
+When all tasks are completed, the command performs final wrap-up operations:
+
+**1. Final Push Confirmation (unless `--no-push`)**
+
+If `--no-push` flag is **NOT** specified:
+```bash
+# Verify all changes are committed
+git status
+
+# Push to remote
+git push
+
+# Verify push succeeded
+git log --oneline -5
+```
+
+If `--no-push` flag **IS** specified:
+- Skip all push operations
+- All commits remain local
+- User must push manually when ready
+
+**2. Update TODO.md File**
+
+Mark all tasks as complete and add completion metadata:
+```markdown
+## 📈 Progress Status
+
+- **Completed**: 14/14 tasks (100%) ✅
+- **Completion Date**: 2025-01-21 14:30:00 UTC
+- **Total Execution Time**: 3 hours 45 minutes
+
+## 🎯 Implementation Summary
+
+All planned features have been successfully implemented:
+- Database schema updated with user profile fields
+- File upload middleware configured
+- Avatar upload endpoint created
+- Frontend components integrated
+- Manual testing completed
+
+## 📚 Reference Files Created
+
+- `docs/memory/todo-task-run-progress.md` - Execution audit trail
+- `docs/memory/investigation-2025-01-21-file-upload.md` - File upload research
+- `docs/memory/patterns/avatar-upload-pattern.md` - Reusable pattern documentation
+```
+
+**3. Final Memory Consolidation**
+
+Update progress memory file with final summary:
+```markdown
+# Task Execution Complete - 2025-01-21 14:30:00 UTC
+
+## Execution Summary
+- Total tasks: 14
+- Completed: 14
+- Blocked: 0
+- Execution time: 3 hours 45 minutes
+
+## Key Achievements
+- User profile editing fully functional
+- Avatar upload working with S3 storage
+- Frontend components integrated and tested
+
+## Technical Decisions
+- Chose S3 over Cloudinary (team already familiar with AWS)
+- Used multer middleware for file handling
+- Implemented client-side image preview with FileReader API
+
+## Files Created/Modified
+- models/User.ts (updated)
+- migrations/20250121_add_profile_fields.ts (created)
+- api/users/profile.ts (created)
+- api/users/avatar.ts (created)
+- middleware/upload.ts (created)
+- components/ProfileEditForm.vue (created)
+- components/AvatarUpload.vue (created)
+- pages/profile/edit.vue (updated)
+
+## Lessons Learned
+- S3 bucket CORS configuration required manual setup
+- Image preview improves user experience significantly
+- Multer memory storage works well for files under 5MB
+
+## Future Maintenance Notes
+- Avatar files stored in S3 bucket: user-avatars-prod
+- Image size limit: 5MB (configured in middleware/upload.ts)
+- Supported formats: jpeg, png, webp
+```
+
+**4. Update Pull Request (unless `--no-pr`)**
+
+If `--no-pr` flag is **NOT** specified:
+```typescript
+// Use /cccp:pull-request skill to update PR
+await Skill({
+  skill: 'cccp:pull-request',
+  args: '' // Updates existing PR
+});
+
+// The skill will:
+// - Update PR title if needed
+// - Update PR description with:
+//   - Completed features list
+//   - Files changed summary
+//   - Testing notes
+//   - Technical value delivered
+// - Add completion comment to PR
+// - Mark PR as ready for review
+```
+
+**PR Update Example:**
+```markdown
+# User Profile Enhancement Feature
+
+## Summary
+✅ All 14 tasks completed successfully
+
+Implemented user profile editing with avatar upload:
+- Database: Added avatarUrl and bio fields to User model
+- API: Created profile update and avatar upload endpoints
+- Frontend: Built ProfileEditForm and AvatarUpload components
+- Testing: Manual testing completed, all scenarios verified
+
+## Files Changed (8 files)
+- models/User.ts
+- migrations/20250121_add_profile_fields.ts
+- api/users/profile.ts
+- api/users/avatar.ts
+- middleware/upload.ts
+- components/ProfileEditForm.vue
+- components/AvatarUpload.vue
+- pages/profile/edit.vue
+
+## Technical Value
+- User profile editing: ✅ Complete
+- Avatar upload with S3: ✅ Complete
+- Frontend integration: ✅ Complete
+- Manual testing: ✅ Passed
+
+## Quality Metrics
+- Code quality: ✅ Follows existing patterns
+- Error handling: ✅ Comprehensive
+- User experience: ✅ Smooth workflows
+
+Ready for code review! 🚀
+```
+
+If `--no-pr` flag **IS** specified:
+- Skip PR update entirely
+- User responsible for PR management
+
+**5. Final Report to User**
+
+The command provides comprehensive completion report:
+```
+✅ Task Execution Complete!
+
+Summary:
+- Total tasks: 14
+- Completed: 14 (100%)
+- Blocked: 0
+- Execution time: 3 hours 45 minutes
+
+Git Operations:
+- Commits: 14 (via /cccp:micro-commit)
+- Pushes: 14 (to remote)
+- Pull Request: Updated with completion details
+
+Files Modified:
+- models/User.ts
+- migrations/20250121_add_profile_fields.ts
+- api/users/profile.ts
+- api/users/avatar.ts
+- middleware/upload.ts
+- components/ProfileEditForm.vue
+- components/AvatarUpload.vue
+- pages/profile/edit.vue
+
+Memory Files:
+- docs/memory/todo-task-run-progress.md (execution audit trail)
+- docs/memory/investigation-2025-01-21-file-upload.md (research findings)
+- docs/memory/patterns/avatar-upload-pattern.md (reusable pattern)
+
+Next Steps:
+1. Review pull request: [PR URL]
+2. Request code review from team
+3. Address review feedback if needed
+4. Merge after approval
+
+The feature is complete and ready for review! 🎉
+```
+
+**Execution Flow Summary:**
+
+```
+Phase 1: Initial Setup
+  ├─ Read TODO.md
+  ├─ Git fetch
+  ├─ Classify tasks
+  ├─ Create PR (unless --no-pr)
+  └─ Initialize memory
+
+Phase 2: Task Execution Loop
+  ├─ For each task:
+  │   ├─ Execute with Task tool
+  │   ├─ Verify completion
+  │   ├─ Update TODO.md
+  │   ├─ Commit (micro-commit)
+  │   ├─ Push (unless --no-push)
+  │   └─ Store result for next task
+  └─ Continue until all complete or blocked
+
+Phase 3: Error Handling (if needed)
+  ├─ Mark task as blocked
+  ├─ Record in memory
+  ├─ Report to user
+  ├─ Stop execution
+  └─ Wait for user to fix (forward-only)
+
+Phase 4: Final Completion
+  ├─ Final push (unless --no-push)
+  ├─ Update TODO.md with summary
+  ├─ Consolidate memory files
+  ├─ Update PR (unless --no-pr)
+  └─ Report completion to user
+```
 
 ### Options: --no-pr and --no-push
 
-[To be completed in Phase 4.3]
+The `todo-task-run` command provides two optional flags that control Git workflow automation. These flags give you fine-grained control over pull request creation and remote push operations.
+
+#### Overview of Flags
+
+| Flag | Default Behavior | With Flag | Use Case |
+|------|-----------------|-----------|----------|
+| (none) | Creates/updates PR + Pushes to remote | Full automation | Standard team workflow |
+| `--no-pr` | Skips PR creation/update | Local/remote commits only | Working on exploratory branch |
+| `--no-push` | Skips remote push | Local commits only | Offline work or local testing |
+| `--no-pr --no-push` | Skips both | Fully local workflow | Experimental work |
+
+#### --no-pr Flag Behavior
+
+The `--no-pr` flag **disables pull request creation and updates** during task execution.
+
+**Default Behavior (without --no-pr):**
+```bash
+/cccp:todo-task-run TODO.md
+```
+
+**What Happens:**
+1. **Initial Setup Phase:**
+   - Uses `/cccp:pull-request` skill to create PR
+   - If on `main` branch, creates new feature branch automatically
+   - Creates empty initial commit to enable PR
+   - Opens pull request with template from `.github/PULL_REQUEST_TEMPLATE.md`
+   - Links to existing PR if one is already open for the branch
+
+2. **During Task Execution:**
+   - Tasks are committed and pushed
+   - PR description is not updated mid-execution (only at completion)
+
+3. **Final Completion Phase:**
+   - Uses `/cccp:pull-request` skill to update PR
+   - Updates PR title and description with:
+     - List of completed features
+     - Files changed summary
+     - Testing status
+     - Technical value delivered
+   - Adds completion comment to PR
+   - Marks PR as ready for review
+   - Outputs PR URL for user
+
+**With --no-pr Flag:**
+```bash
+/cccp:todo-task-run TODO.md --no-pr
+```
+
+**What Changes:**
+1. **Initial Setup Phase:**
+   - **Skips** `/cccp:pull-request` skill entirely
+   - Works on current branch (no branch creation)
+   - No empty commit created
+   - No PR opened
+
+2. **During Task Execution:**
+   - Tasks are executed normally
+   - Changes are committed (via `/cccp:micro-commit`)
+   - Changes are pushed to remote (unless `--no-push` also used)
+   - **No PR description updates**
+
+3. **Final Completion Phase:**
+   - **Skips** PR update
+   - **No PR-related output**
+   - User responsible for creating PR manually later
+
+**When to Use --no-pr:**
+
+✅ **Use --no-pr when:**
+- You're doing exploratory work and don't want a PR yet
+- You want to keep commits on a branch without opening a PR
+- You're working on a personal fork and will create PR manually
+- You want to accumulate multiple TODO.md executions before creating PR
+- You're testing the workflow locally and don't need a PR
+- You're working on a branch that will be merged via another method
+
+❌ **Don't use --no-pr when:**
+- You're following standard team PR workflow
+- You want automated PR creation and updates
+- You need PR template to be filled automatically
+- You want the full Git workflow automation
+
+**Example Workflow with --no-pr:**
+
+```bash
+# Scenario: Exploratory work on email notification feature
+
+# Step 1: Create TODO.md with tasks
+cat > TODO.md << 'EOF'
+# Email Notification Research
+
+- [ ] Investigate existing email libraries
+- [ ] Research SendGrid vs AWS SES pricing
+- [ ] Create proof-of-concept email sender
+EOF
+
+# Step 2: Run without PR (exploratory work)
+/cccp:todo-task-run TODO.md --no-pr
+
+# Execution:
+# - Tasks executed
+# - Changes committed locally
+# - Changes pushed to current branch
+# - NO PR created
+
+# Step 3: Later, when ready for PR
+gh pr create --title "Email Notification Implementation" --body "..."
+
+# OR: Run todo-task-planning with --pr for next phase
+/cccp:todo-task-planning TODO-phase2.md --pr
+/cccp:todo-task-run TODO-phase2.md
+```
+
+#### --no-push Flag Behavior
+
+The `--no-push` flag **disables remote push operations** during task execution.
+
+**Default Behavior (without --no-push):**
+```bash
+/cccp:todo-task-run TODO.md
+```
+
+**What Happens:**
+1. **During Task Execution:**
+   - After each task completion:
+     - Changes committed via `/cccp:micro-commit`
+     - **Immediately pushed to remote:** `git push`
+     - Push verified before proceeding to next task
+
+2. **Final Completion Phase:**
+   - Final verification push: `git push`
+   - Confirms all commits are on remote
+
+**With --no-push Flag:**
+```bash
+/cccp:todo-task-run TODO.md --no-push
+```
+
+**What Changes:**
+1. **During Task Execution:**
+   - After each task completion:
+     - Changes committed via `/cccp:micro-commit`
+     - **Skips push to remote** (no `git push`)
+     - All commits remain local only
+
+2. **Final Completion Phase:**
+   - **Skips final push**
+   - User must manually push when ready: `git push`
+
+**Important Notes:**
+- Commits are still created (via `/cccp:micro-commit`)
+- PR is still created/updated (unless `--no-pr` also used)
+- All changes remain on local branch until manual push
+
+**When to Use --no-push:**
+
+✅ **Use --no-push when:**
+- You're working offline or have intermittent internet
+- You want to review all commits locally before pushing
+- You're testing changes and may need to modify commits
+- You want to batch push all commits at once at the end
+- You're working on a sensitive branch and want manual push control
+- Network conditions are poor and you want to avoid repeated push attempts
+
+❌ **Don't use --no-push when:**
+- You want continuous integration tests to run on each commit
+- You're working in a team and want others to see progress
+- You want backup of work on remote server immediately
+- You're following standard continuous deployment workflow
+
+**Example Workflow with --no-push:**
+
+```bash
+# Scenario: Working offline on a plane
+
+# Step 1: Run task execution without pushing
+/cccp:todo-task-run TODO.md --no-push
+
+# Execution:
+# - All tasks executed
+# - 14 commits created locally
+# - Changes staged in local branch
+# - NO pushes to remote
+
+# Step 2: Check local commits
+git log --oneline -14
+
+# Output:
+# abc1234 Add AvatarUpload component
+# abc1235 Create ProfileEditForm component
+# abc1236 Implement avatar upload endpoint
+# ... (14 commits total)
+
+# Step 3: When back online, push all at once
+git push
+
+# OR: Let the PR update push for you
+/cccp:pull-request  # This will push and update PR
+```
+
+#### Combining Both Flags
+
+You can use both `--no-pr` and `--no-push` together for fully local workflow.
+
+**Command:**
+```bash
+/cccp:todo-task-run TODO.md --no-pr --no-push
+```
+
+**Behavior:**
+- **Initial Setup:** No PR creation, works on current branch
+- **Task Execution:** Tasks executed, changes committed locally, no pushes
+- **Final Completion:** No PR update, no push, all work remains local
+
+**When to Use Both:**
+
+✅ **Use --no-pr --no-push when:**
+- You're doing experimental work that may be discarded
+- You're working completely offline
+- You want full manual control over all Git operations
+- You're testing the command behavior without affecting remote
+- You're developing on a local-only branch
+
+**Example Workflow with Both Flags:**
+
+```bash
+# Scenario: Experimental feature that may not ship
+
+# Step 1: Create experimental TODO
+cat > TODO-experiment.md << 'EOF'
+# Experimental: Real-time Notifications
+
+- [ ] Research WebSocket libraries
+- [ ] Create WebSocket server prototype
+- [ ] Test with 100 concurrent connections
+EOF
+
+# Step 2: Run fully local
+/cccp:todo-task-run TODO-experiment.md --no-pr --no-push
+
+# Execution:
+# - All tasks executed locally
+# - Commits created on current branch
+# - NO PR created
+# - NO pushes to remote
+# - Fully contained on local machine
+
+# Step 3: Decision point
+
+# If experiment succeeds:
+git push
+gh pr create --title "Real-time Notifications" --body "..."
+
+# If experiment fails:
+git reset --hard origin/main  # Safe because nothing was pushed
+# OR keep commits for future reference
+```
+
+#### Comparison Table: Flag Combinations
+
+| Flags | PR Creation | Commits | Push | Use Case |
+|-------|------------|---------|------|----------|
+| (none) | ✅ Yes | ✅ Yes | ✅ Yes | **Standard team workflow** - Full automation |
+| `--no-pr` | ❌ No | ✅ Yes | ✅ Yes | **Exploratory work** - Keep commits, defer PR |
+| `--no-push` | ✅ Yes | ✅ Yes | ❌ No | **Offline work** - PR created, commits local |
+| `--no-pr --no-push` | ❌ No | ✅ Yes | ❌ No | **Experimental** - Fully local, no remote ops |
+
+#### Flag Order and Syntax
+
+**Flags can be specified in any order:**
+```bash
+# Both are equivalent:
+/cccp:todo-task-run TODO.md --no-pr --no-push
+/cccp:todo-task-run TODO.md --no-push --no-pr
+
+# File path must come first, flags after:
+✅ /cccp:todo-task-run TODO.md --no-pr
+❌ /cccp:todo-task-run --no-pr TODO.md  # Won't work
+```
+
+#### Important Considerations
+
+**1. PR Creation Requires Push**
+
+If you use `--no-push` but NOT `--no-pr`, note that:
+- PR will be created with initial commit
+- PR description will be updated at completion
+- However, **task commits won't appear in PR** until you manually push
+- GitHub PR won't show latest changes until `git push` is executed
+
+**Recommendation:** If using `--no-push`, consider also using `--no-pr`, then create PR after manual push.
+
+**2. Resuming After Errors**
+
+If execution stops due to error:
+```bash
+# Fix the error manually
+# Commit the fix
+/cccp:micro-commit
+
+# Resume with SAME flags as original run
+/cccp:todo-task-run TODO.md --no-pr  # If originally used --no-pr
+```
+
+**Important:** Use the same flags when resuming to maintain consistent behavior.
+
+**3. Pull Request Updates**
+
+Without `--no-pr`, the PR is updated at **completion**, not during execution:
+- Initial PR created at start (empty or with initial commit)
+- Tasks execute and commit/push
+- **PR description updated only at the end** with final summary
+
+This means the PR will show commits as they're pushed, but the description won't reflect progress until all tasks complete.
+
+#### Quick Reference Guide
+
+**Choose your workflow:**
+
+**Full Automation (Recommended for Teams):**
+```bash
+/cccp:todo-task-run TODO.md
+# Creates PR, commits, pushes, updates PR on completion
+```
+
+**Exploratory Work (Keep Commits, No PR Yet):**
+```bash
+/cccp:todo-task-run TODO.md --no-pr
+# Commits and pushes, but no PR created
+```
+
+**Offline Work (Create PR, Batch Push Later):**
+```bash
+/cccp:todo-task-run TODO.md --no-push
+# Creates PR, commits locally, manual push later
+```
+
+**Experimental Work (Fully Local):**
+```bash
+/cccp:todo-task-run TODO.md --no-pr --no-push
+# Everything stays local, full manual control
+```
 
 ### micro-commit Integration
 
-[To be completed in Phase 4.4]
+The `todo-task-run` command integrates tightly with the `/cccp:micro-commit` skill to implement **Lucas Rocha's micro-commit methodology**. This integration ensures every task execution produces clean, meaningful commit history that follows the "one change, one commit" principle.
+
+#### What is Micro-Commit Methodology?
+
+Micro-commit methodology, pioneered by Lucas Rocha, is a Git workflow based on **test-driven development cycles** where each commit represents a single, atomic change. The core principle is:
+
+> **1 change = 1 commit**
+
+This approach creates:
+- **Granular history** - Easy to understand what changed and why
+- **Reversible changes** - Each commit can be reverted independently
+- **Reviewable code** - Reviewers can examine changes step-by-step
+- **Traceable bugs** - `git bisect` works effectively to find when bugs were introduced
+- **Clean timeline** - Project evolution is clear and logical
+
+#### Lucas Rocha's Principles
+
+The methodology follows strict test-driven change cycles:
+
+**1. One Change Per Commit**
+- Each commit contains exactly one logical change
+- Changes are not split across multiple commits
+- Multiple unrelated changes are not bundled in one commit
+
+**2. Test-Driven Cycles**
+- Write test → Implement → Commit (Red-Green-Refactor)
+- Each cycle produces one commit
+- Commits always leave code in working state
+
+**3. Context-Based Grouping**
+- Changes are grouped by context (feature, file, component)
+- Related changes stay together logically
+- Unrelated changes are separated into different commits
+
+**4. Meaningful Messages**
+- Each commit message clearly describes the change
+- Messages follow conventional commit format
+- Context is preserved in commit history
+
+#### How todo-task-run Uses /cccp:micro-commit
+
+The `todo-task-run` command **automatically invokes** the `/cccp:micro-commit` skill after each task completion:
+
+**Automatic Integration Flow:**
+
+```typescript
+// After task execution completes
+const task_result = await Task({
+  subagent_type: "general-purpose",
+  description: "Implement login endpoint",
+  prompt: `...`
+});
+
+// Verify task succeeded
+if (!task_result.blockers) {
+  // Automatically invoke micro-commit skill
+  await Skill({
+    skill: 'cccp:micro-commit',
+    args: '' // No args needed, skill analyzes staged changes
+  });
+
+  // Skill will:
+  // 1. Analyze all staged changes (git diff --staged)
+  // 2. Group changes by context (file, feature, component)
+  // 3. Create fine-grained commits, one per context
+  // 4. Generate meaningful commit messages
+  // 5. Follow conventional commit format
+}
+```
+
+**What the Skill Does:**
+
+1. **Analyzes Staged Changes**
+   ```bash
+   git diff --staged
+   ```
+   - Examines all files in staging area
+   - Identifies change contexts (models, controllers, views, tests, etc.)
+
+2. **Groups Changes by Context**
+   - Model changes → One commit
+   - Controller changes → Separate commit
+   - View changes → Separate commit
+   - Test changes → Separate commit (if for NEW feature)
+   - Configuration changes → Separate commit
+
+3. **Creates Commits**
+   - One commit per context group
+   - Each commit is atomic and self-contained
+   - Commits follow conventional format: `type(scope): description`
+
+4. **Generates Messages**
+   - Analyzes code diff to understand intent
+   - Writes clear, descriptive commit messages
+   - Follows project commit message conventions
+
+**Example: Single Task → Multiple Commits**
+
+**Task:** Implement user registration endpoint
+
+**Files Changed:**
+- `models/User.ts` - Add validation methods
+- `controllers/auth.ts` - Add registration endpoint
+- `tests/auth.test.ts` - Add registration tests
+- `config/routes.ts` - Register new route
+
+**Micro-Commit Skill Creates:**
+
+```bash
+# Commit 1: Model changes
+feat(models): add email and password validation to User model
+
+- Add isValidEmail() method for email format validation
+- Add isStrongPassword() method for password strength check
+- Add validateRegistration() method combining validations
+
+# Commit 2: Controller changes
+feat(auth): implement user registration endpoint
+
+- Create POST /api/auth/register route handler
+- Validate registration data using User.validateRegistration()
+- Hash password with bcrypt before saving
+- Return JWT token and user data on success
+- Handle duplicate email error with 409 response
+
+# Commit 3: Route configuration
+chore(routes): register user registration endpoint
+
+- Add POST /api/auth/register to route table
+- Map route to auth.register controller method
+
+# Commit 4: Test changes (if YAGNI-compliant)
+test(auth): add tests for user registration feature
+
+- Test successful registration with valid data
+- Test validation errors for invalid email
+- Test validation errors for weak password
+- Test duplicate email handling
+```
+
+**Result:** 4 commits instead of 1 monolithic commit. Each commit is:
+- ✅ Atomic - Can be reverted independently
+- ✅ Focused - One change per commit
+- ✅ Meaningful - Clear purpose and description
+- ✅ Reviewable - Easy to understand in PR
+
+#### Benefits of Micro-Commit in todo-task-run
+
+**1. Clean History Per Task**
+
+Each task execution creates logically grouped commits:
+```
+Task 1: Investigate auth patterns
+└─ (no commits - investigation task)
+
+Task 2: Implement login endpoint
+├─ feat(models): add User.authenticate() method
+├─ feat(auth): implement login endpoint
+└─ chore(routes): register login route
+
+Task 3: Add session management
+├─ feat(models): create Session model
+├─ feat(auth): integrate session storage in login
+└─ chore(config): configure Redis session store
+```
+
+**2. Better Code Review**
+
+Reviewers can examine commits individually:
+- Each commit has clear purpose
+- Changes are easier to understand in isolation
+- Review feedback can reference specific commits
+
+**3. Easier Debugging**
+
+When bugs are found:
+```bash
+# Use git bisect to find which commit introduced bug
+git bisect start
+git bisect bad HEAD
+git bisect good v1.0.0
+
+# Git will binary search through commits
+# Micro-commits make it easy to identify exact change that broke things
+```
+
+**4. Flexible Rollback**
+
+If a specific change needs to be reverted:
+```bash
+# Revert just the session storage commit
+git revert abc123  # Reverts "feat(auth): integrate session storage"
+
+# Other commits remain intact
+# Much harder with monolithic commits
+```
+
+#### Micro-Commit vs Manual Commits
+
+**Without Micro-Commit (Manual):**
+```bash
+# User stages all changes
+git add .
+
+# User writes generic commit message
+git commit -m "Implement user registration"
+
+# Result: 1 monolithic commit with all changes
+# - Hard to review
+# - Hard to revert specific changes
+# - Loses context about what changed where
+```
+
+**With Micro-Commit (Automatic via todo-task-run):**
+```bash
+# todo-task-run automatically:
+# 1. Stages changes
+# 2. Invokes /cccp:micro-commit skill
+# 3. Skill analyzes and groups changes
+# 4. Creates 4 focused commits
+
+# Result: 4 atomic commits
+# - Easy to review (one context per commit)
+# - Easy to revert (pick specific commits)
+# - Preserves context (clear what changed in each file)
+```
+
+#### When Micro-Commits Are Created
+
+**During Task Execution:**
+
+The `/cccp:micro-commit` skill is invoked:
+- **After each task completes successfully**
+- **Before pushing to remote** (unless `--no-push`)
+- **Only if there are staged changes**
+
+**Not Invoked For:**
+- Investigation tasks (no code changes)
+- Tasks that fail or are blocked
+- Tasks with no file modifications
+
+**Execution Flow:**
+
+```
+Task N Execution:
+1. Execute task (modify files)
+2. Stage changes (git add)
+3. Invoke /cccp:micro-commit skill ✅
+4. Skill creates commits (1 or more)
+5. Push to remote (unless --no-push)
+6. Update TODO.md status
+7. Update progress memory
+8. Proceed to Task N+1
+```
+
+#### Micro-Commit Skill Details
+
+**Full Command Reference:**
+```bash
+/cccp:micro-commit
+
+# No arguments needed
+# Skill automatically analyzes staged changes and creates commits
+```
+
+**What the Skill Analyzes:**
+- File paths and extensions (determines context)
+- Code diff content (understands what changed)
+- Project structure (follows existing patterns)
+- Commit message conventions (adheres to conventional format)
+
+**Commit Message Format:**
+
+The skill generates commits following [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types Used:**
+- `feat` - New feature implementation
+- `fix` - Bug fix
+- `refactor` - Code restructuring (only if essential)
+- `test` - Test addition (for new features)
+- `chore` - Configuration, dependencies, tooling
+- `docs` - Documentation (only if essential)
+
+**Scope Examples:**
+- `(models)` - Model layer changes
+- `(auth)` - Authentication feature
+- `(api)` - API endpoints
+- `(ui)` - User interface
+- `(config)` - Configuration files
+
+**Description Rules:**
+- Start with lowercase verb (add, implement, update, fix)
+- Be concise but descriptive
+- Focus on "what" and "why", not "how"
+
+#### Example: Multi-File Task → Micro-Commits
+
+**Scenario:** Task to implement avatar upload feature
+
+**Files Modified:**
+```
+models/User.ts              (added avatarUrl field)
+api/users/avatar.ts         (created upload endpoint)
+middleware/upload.ts        (created multer config)
+config/s3.ts                (created S3 client)
+components/AvatarUpload.vue (created upload component)
+```
+
+**Manual Approach (1 commit):**
+```bash
+git add .
+git commit -m "Add avatar upload feature"
+# All 5 files in one commit
+```
+
+**Micro-Commit Approach (5 commits):**
+
+```bash
+# Commit 1
+feat(models): add avatarUrl field to User model
+
+# Commit 2
+feat(middleware): create upload middleware with multer
+
+- Configure multer for memory storage
+- Validate image file types (jpeg, png, webp)
+- Enforce 5MB file size limit
+
+# Commit 3
+chore(config): configure AWS S3 client
+
+- Create S3 client with credentials from env
+- Configure bucket name and region
+- Add helper methods for upload and delete
+
+# Commit 4
+feat(api): implement avatar upload endpoint
+
+- Create POST /api/users/:id/avatar endpoint
+- Use upload middleware for multipart handling
+- Upload image to S3 bucket
+- Update user avatarUrl in database
+- Return updated user object
+
+# Commit 5
+feat(ui): create AvatarUpload component
+
+- Add file input with image preview
+- Display current avatar with fallback
+- Show upload progress indicator
+- Handle upload errors with user feedback
+- Integrate with avatar upload API endpoint
+```
+
+**Advantages:**
+- ✅ Each commit has single responsibility
+- ✅ Commits can be reviewed independently
+- ✅ Easy to revert S3 config without affecting UI
+- ✅ Clear progression from backend to frontend
+- ✅ Git history tells the story of implementation
+
+#### Best Practices with Micro-Commit
+
+**1. Trust the Skill**
+
+Let `/cccp:micro-commit` handle commit creation:
+- ✅ **DO:** Let skill analyze and group changes automatically
+- ❌ **DON'T:** Manually stage files before running skill
+- ❌ **DON'T:** Try to outsmart the skill's grouping logic
+
+**2. Stage All Changes Before Skill**
+
+The skill expects all task changes to be staged:
+```bash
+# This is done automatically by todo-task-run:
+git add <files_modified_by_task>
+
+# Then skill is invoked
+/cccp:micro-commit
+```
+
+**3. One Task = One Skill Invocation**
+
+Don't invoke the skill multiple times per task:
+- ✅ **DO:** Complete task, stage all changes, invoke skill once
+- ❌ **DON'T:** Invoke skill multiple times for partial changes
+
+**4. Review Generated Commits**
+
+After skill completes, verify commits:
+```bash
+# Check commits created
+git log --oneline -5
+
+# Review each commit's changes
+git show abc123
+git show def456
+```
+
+**5. Forward-Only Policy**
+
+Never use `git reset` or `git revert` to undo commits:
+- ✅ **DO:** Fix issues with new commits
+- ❌ **DON'T:** Rollback or amend commits (breaks micro-commit principle)
+
+#### Integration with Task Workflow
+
+**Complete Workflow Example:**
+
+```
+1. todo-task-planning creates TODO.md:
+   - Task 1: Implement login endpoint
+   - Task 2: Add session management
+   - Task 3: Create frontend login form
+
+2. todo-task-run executes tasks:
+
+   Task 1: Implement login endpoint
+   ├─ Execute implementation
+   ├─ Files modified: models/User.ts, controllers/auth.ts, routes.ts
+   ├─ Stage changes: git add models/ controllers/ routes.ts
+   ├─ Invoke /cccp:micro-commit ✅
+   │   ├─ Commit 1: feat(models): add User.authenticate() method
+   │   ├─ Commit 2: feat(auth): implement login endpoint
+   │   └─ Commit 3: chore(routes): register login route
+   ├─ Push commits: git push
+   └─ Update TODO.md: Task 1 complete ✅
+
+   Task 2: Add session management
+   ├─ Execute implementation
+   ├─ Files modified: models/Session.ts, services/SessionStore.ts, config/redis.ts
+   ├─ Stage changes: git add models/ services/ config/
+   ├─ Invoke /cccp:micro-commit ✅
+   │   ├─ Commit 4: feat(models): create Session model
+   │   ├─ Commit 5: feat(services): implement session store with Redis
+   │   └─ Commit 6: chore(config): configure Redis connection
+   ├─ Push commits: git push
+   └─ Update TODO.md: Task 2 complete ✅
+
+   Task 3: Create frontend login form
+   ├─ Execute implementation
+   ├─ Files modified: components/LoginForm.vue, pages/login.vue
+   ├─ Stage changes: git add components/ pages/
+   ├─ Invoke /cccp:micro-commit ✅
+   │   ├─ Commit 7: feat(components): create LoginForm component
+   │   └─ Commit 8: feat(pages): integrate LoginForm in login page
+   ├─ Push commits: git push
+   └─ Update TODO.md: Task 3 complete ✅
+
+3. Final result:
+   - 3 tasks completed
+   - 8 atomic micro-commits created
+   - Clean, reviewable Git history
+   - PR ready for review with meaningful commit history
+```
+
+#### Troubleshooting Micro-Commit
+
+**Issue: "No changes to commit"**
+
+**Cause:** No files were modified or staged by task
+
+**Solution:** Verify task actually made changes:
+```bash
+git status
+git diff
+```
+
+---
+
+**Issue: "Commits are too granular"**
+
+**Cause:** Skill is working correctly - micro-commits are intentionally granular
+
+**Solution:** This is expected behavior. Granular commits are beneficial for:
+- Code review (easier to review small commits)
+- Debugging (git bisect works better)
+- Rollback (can revert specific changes)
+
+---
+
+**Issue: "Want to combine commits before pushing"**
+
+**Cause:** Desire to squash commits into one
+
+**Solution:** **DON'T squash commits** - this defeats the micro-commit methodology:
+- ❌ Breaks granular history
+- ❌ Makes code review harder
+- ❌ Loses context about individual changes
+
+If you must squash, do it during PR merge (GitHub's "Squash and merge" option).
+
+---
+
+**Issue: "Commit message doesn't match my intent"**
+
+**Cause:** Skill inferred intent from code changes
+
+**Solution:** Use `git commit --amend` carefully:
+```bash
+# View the commit
+git log -1 --stat
+
+# If message is inaccurate, amend it
+git commit --amend -m "Better description"
+
+# CAUTION: Only amend if not yet pushed
+# After push, accept the message or create corrective commit
+```
+
+#### Summary: Why Micro-Commit Integration Matters
+
+The integration of `/cccp:micro-commit` into `todo-task-run` provides:
+
+1. **Automatic Excellence** - No need to manually craft commits, skill does it perfectly
+2. **Consistent History** - All tasks follow same commit pattern
+3. **Reviewable Changes** - Each commit is small, focused, and understandable
+4. **Traceable Evolution** - Git history clearly shows how project evolved
+5. **Flexible Rollback** - Individual changes can be reverted without affecting others
+6. **Best Practices Enforced** - Lucas Rocha's methodology applied automatically
+
+**Key Takeaway:**
+
+> The combination of `todo-task-run` (task orchestration) and `/cccp:micro-commit` (commit creation) produces **professional-grade Git history** without any manual effort. Each task execution leaves a trail of meaningful, atomic commits that tell the story of your implementation.
 
 ## Best Practices and Examples
 
