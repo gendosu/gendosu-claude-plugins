@@ -734,7 +734,7 @@ TODOタスクでYAGNIに従うことで、以下が得られます:
 **⚠️ 重要な要件: 順次実行**
 
 エージェントは並列ではなく、**必ず順次実行する必要があります**:
-- Planエージェントは、ExploreエージェントからExpect `exploration_results`が必要
+- Planエージェントは、Exploreエージェントからの`exploration_results`が必要
 - project-managerエージェントは`exploration_results`と`planning_results`の両方が必要
 - エージェントを並列実行すると、依存関係の欠落により失敗します
 
