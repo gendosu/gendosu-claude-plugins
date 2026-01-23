@@ -670,7 +670,29 @@ Task({
    - Record recommended specifications and selection reasons in a structured manner (details saved in docs/memory)
    - **docs/memory Reference Information**: Record file paths of related research and analysis results
 
+9. **AskUserQuestion Tool Execution (MANDATORY BEFORE PHASE 4)**
+   - **🚨 CRITICAL**: If questions were extracted in step 6, you MUST execute AskUserQuestion tool before proceeding to Phase 4
+   - **Execution Conditions**:
+     - If `strategic_plan.user_questions` exists and contains questions → MUST execute AskUserQuestion
+     - If questions were extracted during Phase 3 analysis → MUST execute AskUserQuestion
+     - If there are unclear specifications or multiple valid approaches → MUST execute AskUserQuestion
+   - **Execution Steps**:
+     - [ ] Present each question using AskUserQuestion tool with structured options (2-4 choices)
+     - [ ] Set concise headers (max 12 chars) for each question
+     - [ ] Include clear descriptions explaining each option's implications
+     - [ ] Use multiSelect: true when multiple answers can be selected
+     - [ ] Wait for user responses - DO NOT proceed to Phase 4 until answered
+   - **After Receiving Answers**:
+     - [ ] Record user responses in `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
+     - [ ] Update task planning based on user decisions
+     - [ ] Resolve any 🚧 Blocked or 🔍 Research tasks that depended on answers
+   - **If No Questions**:
+     - If there are genuinely no questions or uncertainties, proceed directly to Phase 4
+     - Document in Phase 5 summary why no questions were needed
+
 ### Phase 4: $ARGUMENTS File Update
+
+**⚠️ MANDATORY PRECONDITION**: All questions extracted in Phase 3 MUST be answered via AskUserQuestion tool before starting this phase. If questions exist but were not answered, STOP and return to Phase 3 step 9.
 
 9. **Thorough Update of $ARGUMENTS File**
     - **🔀 Branch Creation Task (when --branch or --pr option is specified)**
@@ -738,6 +760,11 @@ Task({
     - **Required**: Reload and confirm the updated file
     - Verify the consistency and completeness of tasks
     - Check for missing or duplicate questions
+    - **AskUserQuestion Execution Verification**:
+      - [ ] Confirm AskUserQuestion tool was executed for all extracted questions in Phase 3
+      - [ ] Verify user responses were recorded in `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
+      - [ ] If questions existed but AskUserQuestion was NOT executed, this is a CRITICAL ERROR - report to user
+      - [ ] If no questions existed, document this fact in Phase 5 summary
     - **Technical Consistency Verification**: Reconfirm whether the proposed tasks are technically executable
     - **Dependency Verification**: Confirm whether dependencies between tasks are correctly set
     - **Research Rationale Verification**: Confirm whether there are any omissions in the recorded research results
@@ -746,6 +773,11 @@ Task({
     - **Research Performance**: Report the number of researched files and directories
     - **Analysis Results**: Report the number of newly created tasks and their classification
     - **Verification Status**: Report identified questions and confirmation items
+    - **AskUserQuestion Execution Report** (MANDATORY):
+      - Report whether AskUserQuestion tool was executed
+      - If executed: Report number of questions asked and answers received
+      - If not executed: Explicitly state "No questions required" with justification
+      - Report location of recorded answers: `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
     - **Technical Insights**: Report discovered technical issues, constraints, and opportunities
     - **Recommended Actions**: Concretely specify the next action items
     - **Improvement Proposals**: Propose improvements for iterative execution
