@@ -5,6 +5,19 @@ All notable changes to the CCCP plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-01-24
+
+### Fixed
+
+- **todo-task-run**: Fixed critical issue where session would terminate prematurely with incomplete tasks remaining
+  - Added explicit execution policy requiring continuation until ALL tasks are marked complete
+  - Added mandatory TODO.md re-read and incomplete task check after each task completion
+  - Added session continuation rules preventing premature termination
+  - Added Final Completion Process prerequisite check to verify all tasks are complete
+  - Added blocker resolution continuation procedure
+  - Added execution guarantee documentation clarifying that all tasks will be executed
+  - Tasks will now continue executing sequentially until completion or blocker is encountered
+
 ## [1.0.2] - 2026-01-23
 
 ### Fixed
