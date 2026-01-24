@@ -48,12 +48,21 @@ Before starting any task, read and follow `/cccp:key-guidelines`
 
 ## Command Overview
 
-The `/cccp:todo-task-run` command is designed for **execution mode** - it takes a pre-existing TODO.md file and systematically executes the tasks defined within it.
+The `/cccp:todo-task-run` command is designed for **execution mode** - it takes a pre-existing TODO.md file and systematically executes ALL tasks defined within it until completion.
 
 ### Role and Responsibility
-- **Management**: Orchestrate task execution from TODO.md, manage progress, and coordinate the overall workflow
+- **Complete Execution**: Execute ALL tasks in TODO.md sequentially until every task is marked `- [x]`
+- **Progress Management**: Orchestrate task execution, manage progress, and coordinate the overall workflow
+- **Continuous Operation**: Continue executing tasks until completion or blocker - NEVER stop prematurely
 - **Not for planning**: This command does NOT create tasks or convert requirements into actionable items
 - **Task planning**: Use `/cccp:todo-task-planning` to convert requirements into a structured TODO.md before using this command
+
+### Execution Guarantee
+This command guarantees:
+1. ✅ **Every task will be executed** in sequential order
+2. ✅ **No tasks will be skipped** unless explicitly blocked
+3. ✅ **Session continues until all tasks are complete** or a blocker is encountered
+4. ✅ **Incomplete tasks will NOT be left unfinished** without user awareness
 
 ### Relationship with todo-task-planning
 1. **Planning phase** (`/cccp:todo-task-planning`): Analyze requirements → Create TODO.md with actionable tasks
@@ -68,6 +77,21 @@ The `/cccp:todo-task-run` command is designed for **execution mode** - it takes 
 ```
 
 ## Processing Flow
+
+**⚠️ CRITICAL EXECUTION POLICY**:
+
+This command MUST execute ALL tasks in TODO.md sequentially until completion:
+- ✅ **Execute tasks one by one** in the order they appear
+- ✅ **After each task completion, check for remaining incomplete tasks**
+- ✅ **Continue executing until ALL tasks are marked `- [x]`**
+- ❌ **NEVER end the session while incomplete tasks remain**
+- ❌ **NEVER skip tasks unless explicitly blocked**
+
+**Session Continuation Rule**:
+The session ONLY ends when ONE of these conditions is met:
+1. ✅ All tasks in TODO.md are marked `- [x]` (complete)
+2. 🚧 A task is blocked and requires user intervention
+3. ❌ An unrecoverable error occurs
 
 ### Prerequisites
 
@@ -395,6 +419,13 @@ When a task encounters an error or blocker:
    - DO NOT rollback changes
    - Wait for user intervention or blocker resolution
 
+5. **After blocker resolution**:
+   - Once the user resolves the blocker or provides guidance
+   - Re-read TODO.md to check current task status
+   - If task is now unblocked, resume execution from that task
+   - Continue with normal Task Execution Loop
+   - **IMPORTANT**: DO NOT skip remaining tasks - continue until ALL tasks are complete
+
 #### Task Execution Loop
 
 Repeat the Task tool pattern for each incomplete task until:
@@ -408,7 +439,35 @@ Repeat the Task tool pattern for each incomplete task until:
 4. Verify task completion (verification gate)
 5. Update TODO.md status (`- [ ]` → `- [x]`)
 6. Store task result for next task's context
-7. Repeat until no incomplete tasks remain
+7. **CRITICAL: After each task completion, IMMEDIATELY re-read TODO.md and check for remaining incomplete tasks**
+8. **If ANY incomplete tasks remain (`- [ ]`), IMMEDIATELY continue to next task (return to step 1)**
+9. **ONLY proceed to "Final Completion Process" when ALL tasks are marked `- [x]`**
+
+**⚠️ MANDATORY CONTINUATION CHECK**:
+
+After completing EACH task, you MUST:
+```typescript
+// After task_N execution and TODO.md update
+const todo_content = await Read({ file_path: $ARGUMENTS });
+const has_incomplete_tasks = todo_content.includes('- [ ]');
+
+if (has_incomplete_tasks) {
+  // ✅ Continue to next task immediately
+  // DO NOT proceed to Final Completion Process
+  // DO NOT end the session
+  const next_task_result = await Task({ ... });
+} else {
+  // ✅ All tasks complete - proceed to Final Completion Process
+  // Only now can you proceed to final steps
+}
+```
+
+**Session Continuation Rules**:
+- ❌ **NEVER end the session while incomplete tasks (`- [ ]`) remain in TODO.md**
+- ❌ **DO NOT proceed to "Final Completion Process" if ANY task is incomplete**
+- ✅ **ALWAYS re-read TODO.md after each task to check for incomplete tasks**
+- ✅ **IMMEDIATELY continue to next task if incomplete tasks exist**
+- ✅ **ONLY proceed to final steps when ALL tasks are marked `- [x]`**
 
 ### Task Execution Examples
 
@@ -807,6 +866,28 @@ When encountering errors or unexpected issues during task execution:
 - **System insights**: Record important technical discoveries about the codebase or infrastructure
 
 ### Final Completion Process (Using Task Tool)
+
+**⚠️ CRITICAL PREREQUISITE CHECK**:
+
+Before proceeding to this section, you MUST verify:
+```typescript
+const todo_content = await Read({ file_path: $ARGUMENTS });
+const has_incomplete_tasks = todo_content.includes('- [ ]');
+
+if (has_incomplete_tasks) {
+  // ❌ STOP - Cannot proceed to Final Completion Process
+  // ✅ Return to Task Execution Loop immediately
+  throw new Error("Cannot proceed to Final Completion Process - incomplete tasks remain in TODO.md");
+}
+
+// ✅ All tasks complete - safe to proceed
+```
+
+**ONLY proceed with final completion steps if ALL of these conditions are met**:
+1. ✅ All tasks in TODO.md are marked `- [x]` (NO `- [ ]` remains)
+2. ✅ No tasks are blocked with `🚧` marker
+3. ✅ Task execution loop has completed fully
+
 **Required steps upon all tasks completion**:
 1. **Only when --no-push flag is NOT specified**: **Final push confirmation** - Confirm all changes are pushed to remote with `git push`
 2. **Final update of file specified in $ARGUMENTS**:
@@ -823,3 +904,12 @@ When encountering errors or unexpected issues during task execution:
      - Includes: implemented features, quality metrics, changed files, technical value
      - Adds completion report comment
      - Presents PR page URL for review
+
+**Final Report to User**:
+
+After completing all final steps, provide a comprehensive summary:
+- ✅ Total tasks completed: [N] out of [N]
+- ✅ All tasks status: Complete
+- ✅ Files modified: [List of all files]
+- ✅ PR status: [Created/Updated/N/A]
+- ✅ Next steps: [If applicable]
