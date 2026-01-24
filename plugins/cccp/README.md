@@ -142,6 +142,17 @@ Invoke any command by using the slash command syntax:
 /cccp:todo-task-run TODO.md --no-pr    # Execute without creating PR
 ```
 
+## Documentation
+
+For detailed information about the TODO Task workflow, see:
+
+- **[TODO Task Development Guide JP](docs/todo-task-development-guide.jp.md)** - Comprehensive guide covering:
+  - Basic concepts and Feasibility Markers
+  - `todo-task-planning` command details
+  - `todo-task-run` command details
+  - Practical workflows and best practices
+  - Common mistakes and troubleshooting
+
 ## Project Structure
 
 ```
@@ -157,6 +168,8 @@ cccp/
 │   ├── pull-request.md                # Pull request command
 │   ├── todo-task-planning.md          # Task planning command
 │   └── todo-task-run.md               # Task execution command
+├── docs/
+│   └── todo-task-development-guide.md # Comprehensive TODO Task guide
 ├── skills/
 │   └── key-guidelines/
 │       └── SKILL.md                   # Core guidelines skill
