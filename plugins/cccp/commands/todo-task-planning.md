@@ -239,12 +239,21 @@ Task({
 ```
 
 **Saving Results**:
-- Save in variable `exploration_results`
-- Save details in file `docs/memory/explorations/YYYY-MM-DD-[feature]-exploration.md`
-  - Summary section
-  - Key discoveries (files, patterns, tech stack)
-  - Potential blockers
-  - Recommendations for planning
+- **Agent responsibility**:
+  - Return structured data in variable `exploration_results` containing:
+    - `summary`: Overall findings summary (required)
+    - `files`: Array of {path, purpose, importance} objects
+    - `patterns`: Existing patterns and conventions
+    - `tech_stack`: Technologies and frameworks used
+    - `blockers`: Potential blockers and constraints
+    - `recommendations`: Recommendations for planning phase
+  - **IMPORTANT**: Agent does NOT create files directly (Task tool limitation)
+
+- **Main Claude executor responsibility** (executed in Phase 4):
+  - **MANDATORY**: Use Write tool to create `docs/memory/explorations/YYYY-MM-DD-[feature]-exploration.md`
+  - Format: Transform exploration_results data into structured markdown
+  - Sections: Summary, Key Discoveries, Patterns, Tech Stack, Blockers, Recommendations
+  - Verification: File creation will be confirmed in Phase 0.5
 
 **⚠️ WAIT: Verify Explore Agent Completion**
 
@@ -391,14 +400,21 @@ Task({
 ```
 
 **Saving Results**:
-- Save in variable `planning_results`
-- Save details in file `docs/memory/planning/YYYY-MM-DD-[feature]-plan.md`
-  - Approach (2-3 paragraphs)
-  - Task breakdown
-  - Critical files
-  - Trade-offs
-  - Risks and mitigation
-  - Feasibility status
+- **Agent responsibility**:
+  - Return structured data in variable `planning_results` containing:
+    - `approach_summary`: Implementation strategy (2-3 paragraphs)
+    - `tasks`: Array of task objects with descriptions and dependencies
+    - `critical_files`: Files to create/modify with their roles
+    - `trade_offs`: Technical trade-offs analysis
+    - `risks`: Potential risks and mitigation strategies
+    - `feasibility`: Task categorization by status (✅⏳🔍🚧)
+  - **IMPORTANT**: Agent does NOT create files directly (Task tool limitation)
+
+- **Main Claude executor responsibility** (executed in Phase 4):
+  - **MANDATORY**: Use Write tool to create `docs/memory/planning/YYYY-MM-DD-[feature]-plan.md`
+  - Format: Transform planning_results data into structured markdown
+  - Sections: Approach, Task Breakdown, Critical Files, Trade-offs, Risks and Mitigation, Feasibility Assessment
+  - Verification: File creation will be confirmed in Phase 0.5
 
 #### Phase 0.4: Calling cccp:project-manager Agent
 
@@ -526,8 +542,17 @@ Task({
 ```
 
 **Saving Results**:
-- Save in variable `strategic_plan`
-- Use in subsequent phases
+- **Agent responsibility**:
+  - Return structured data in variable `strategic_plan` containing:
+    - `tasks_by_feasibility`: {ready: [], pending: [], research: [], blocked: []}
+    - `user_questions`: Array of question objects with options (for AskUserQuestion tool)
+    - `checklist_structure`: Complete markdown checklist format
+    - `implementation_recommendations`: Next action items and quality metrics
+
+- **Note**: strategic_plan is NOT saved to disk
+  - **Reason**: Used as intermediate data structure for organizing tasks in Phase 4
+  - **Persistence**: Strategic plan data (tasks, questions, checklist) are integrated into $ARGUMENTS file in Phase 4
+  - **Reference**: Exploration and planning files already provide persistent storage of analysis results
 
 #### Phase 0.5: Result Verification and Preparation
 
@@ -550,9 +575,22 @@ Task({
      - Recommend corrective action
 
 2. **docs/memory File Confirmation**
-   - Check if exploration file was created
-   - Check if planning file was created
-   - Check if file contents are appropriate
+   - [ ] **Check if exploration file exists**: `docs/memory/explorations/YYYY-MM-DD-[feature]-exploration.md`
+     - **If NOT exists**: 🚨 CRITICAL ERROR - Exploration file must be created
+       - Action: Create file immediately using Write tool with exploration_results data
+       - Format: Structured markdown with Summary, Files, Patterns, Tech Stack, Blockers, Recommendations sections
+       - Verify exploration_results variable has valid data before creating file
+   - [ ] **Check if planning file exists**: `docs/memory/planning/YYYY-MM-DD-[feature]-plan.md`
+     - **If NOT exists**: 🚨 CRITICAL ERROR - Planning file must be created
+       - Action: Create file immediately using Write tool with planning_results data
+       - Format: Structured markdown with Approach, Tasks, Critical Files, Trade-offs, Risks, Feasibility sections
+       - Verify planning_results variable has valid data before creating file
+   - [ ] **Verify file contents are complete**
+     - Exploration file: Must contain summary, files list, patterns, tech_stack, blockers, recommendations
+     - Planning file: Must contain approach, tasks, critical_files, trade_offs, risks, feasibility
+   - [ ] **Report to user if files were NOT created in Phase 4**
+     - State which files are missing and why
+     - Confirm files have been created as recovery action
 
 3. **Preparation for Next Phase**
    - If `strategic_plan.user_questions` exists, use in Phase 3
@@ -694,7 +732,60 @@ Task({
 
 **⚠️ MANDATORY PRECONDITION**: All questions extracted in Phase 3 MUST be answered via AskUserQuestion tool before starting this phase. If questions exist but were not answered, STOP and return to Phase 3 step 9.
 
-9. **Thorough Update of $ARGUMENTS File**
+#### File Creation Responsibility and Timeline
+
+**🚨 CRITICAL: docs/memory Files Must Be Created in This Phase**
+
+The following files MUST be created by the Main Claude executor (NOT by agents) in Phase 4:
+
+1. **Exploration results file** (from Phase 0.2):
+   - [ ] **Create** `docs/memory/explorations/YYYY-MM-DD-[feature]-exploration.md`
+   - Source: `exploration_results` variable returned by Explore agent
+   - Tool: Use Write tool
+   - Format: Structured markdown with sections: Summary, Key Discoveries, Patterns, Tech Stack, Blockers, Recommendations
+
+2. **Planning results file** (from Phase 0.3):
+   - [ ] **Create** `docs/memory/planning/YYYY-MM-DD-[feature]-plan.md`
+   - Source: `planning_results` variable returned by Plan agent
+   - Tool: Use Write tool
+   - Format: Structured markdown with sections: Approach, Task Breakdown, Critical Files, Trade-offs, Risks, Feasibility
+
+3. **User answers file** (from Phase 3, if AskUserQuestion was executed):
+   - [ ] **Create** `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md` (if user questions existed)
+   - Source: User responses from AskUserQuestion tool
+   - Tool: Use Write tool
+   - Format: Q&A format with questions and selected answers
+
+**Timeline:**
+- **Phase 0.2-0.4**: Agents return data as variables (`exploration_results`, `planning_results`, `strategic_plan`)
+- **Phase 0.5**: Verify agent completion and data variables exist
+- **👉 Phase 4 (THIS PHASE)**: Main Claude executor creates persistent docs/memory files using Write tool
+- **Phase 5**: Verify file creation and report to user
+
+**Why Agents Cannot Create Files:**
+- Task tool agents run in isolated processes
+- Agent-created files do not persist to Main Claude executor's filesystem
+- Main Claude executor must explicitly use Write tool to create persistent files
+
+9. **Create docs/memory Files (EXECUTE FIRST)**
+    - **⚠️ MANDATORY FIRST STEP**: Before updating $ARGUMENTS file, create all docs/memory files
+    - [ ] **Create exploration file** using Write tool:
+      - Path: `docs/memory/explorations/YYYY-MM-DD-[feature]-exploration.md`
+      - Source data: `exploration_results` variable from Phase 0.2
+      - Format: Markdown with sections: Summary, Key Discoveries, Patterns, Tech Stack, Blockers, Recommendations
+    - [ ] **Create planning file** using Write tool:
+      - Path: `docs/memory/planning/YYYY-MM-DD-[feature]-plan.md`
+      - Source data: `planning_results` variable from Phase 0.3
+      - Format: Markdown with sections: Approach, Task Breakdown, Critical Files, Trade-offs, Risks, Feasibility
+    - [ ] **Create questions file** (if user questions existed) using Write tool:
+      - Path: `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
+      - Source data: User responses from AskUserQuestion tool in Phase 3
+      - Format: Q&A format with questions and user's selected answers
+    - [ ] **Verify all files were created successfully**
+      - Use Bash tool with `ls -la` to confirm file existence
+      - Report any file creation failures as CRITICAL ERROR
+
+10. **Thorough Update of $ARGUMENTS File**
     - **🔀 Branch Creation Task (when --branch or --pr option is specified)**
       - **Add branch creation task as the FIRST task** in the task list section
       - Task format example:
@@ -764,6 +855,15 @@ Task({
     - **Research Performance**: Report the number of researched files and directories
     - **Analysis Results**: Report the number of newly created tasks and their classification
     - **Verification Status**: Report identified questions and confirmation items
+    - **docs/memory Files Creation Report** (MANDATORY):
+      - [ ] **Exploration file**: Confirm `docs/memory/explorations/YYYY-MM-DD-[feature]-exploration.md` was created
+        - If NOT created: Report as CRITICAL ERROR with explanation
+        - If created: Report file size and confirm contents
+      - [ ] **Planning file**: Confirm `docs/memory/planning/YYYY-MM-DD-[feature]-plan.md` was created
+        - If NOT created: Report as CRITICAL ERROR with explanation
+        - If created: Report file size and confirm contents
+      - [ ] **Questions file** (if applicable): Confirm `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md` was created (if user questions existed)
+        - Report whether this file was needed and created
     - **AskUserQuestion Execution Report** (MANDATORY):
       - Report whether AskUserQuestion tool was executed
       - If executed: Report number of questions asked and answers received
