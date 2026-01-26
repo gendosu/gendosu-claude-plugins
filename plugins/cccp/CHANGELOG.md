@@ -5,6 +5,19 @@ All notable changes to the CCCP plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-01-26
+
+### Changed
+
+- **todo-task-planning**: Clarified file creation responsibility and timeline in Phase 0 and Phase 4
+  - Added explicit separation of agent vs main executor responsibilities
+  - Agents return data as variables (exploration_results, planning_results, strategic_plan)
+  - Main Claude executor creates persistent docs/memory files in Phase 4 using Write tool
+  - Added detailed file creation instructions in Phase 4 step 9
+  - Added file verification procedures in Phase 0.5 with error recovery actions
+  - Clarified that strategic_plan is not saved to disk (used as intermediate data)
+  - Improved docs/memory files creation reporting requirements in Phase 5
+
 ## [1.0.4] - 2026-01-25
 
 ### Fixed
