@@ -1,6 +1,8 @@
 ---
 name: micro-commit
 description: Split git changes into context-based micro-commits using Lucas Rocha's methodology. Use when user wants to commit changes as multiple logical micro-commits instead of a single monolithic commit.
+context: fork
+agent: Bash
 trigger:
   - マイクロコミット
   - micro-commit
