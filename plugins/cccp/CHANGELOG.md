@@ -5,6 +5,34 @@ All notable changes to the CCCP plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-01-28
+
+### Added
+
+- **micro-commit**: Migrated from commands to skills system
+  - Now available as `/cccp:micro-commit` skill with automatic keyword triggering
+  - Direct git operation execution using Bash tool
+  - Enhanced with comprehensive examples and error handling documentation
+  - Added keyword triggers: マイクロコミット, micro-commit, split changes, 変更を分けてコミット, 分割コミット
+
+### Changed
+
+- **micro-commit**: Simplified execution model
+  - Removed dependency on `cccp:git-operations-specialist` agent
+  - Git operations now executed directly for improved efficiency
+  - Preserved Lucas Rocha's micro-commit methodology and all grouping strategies
+  - Same user experience with `/cccp:micro-commit` command
+
+### Removed
+
+- **micro-commit**: Deleted `commands/micro-commit.md` (functionality migrated to skills)
+
+### Migration Guide
+
+- **No changes required**: Continue using `/cccp:micro-commit` as before
+- **New feature**: Skill can now be triggered automatically by keywords like "マイクロコミット" or "split changes"
+- **Same methodology**: All grouping strategies and commit guidelines remain unchanged
+
 ## [2.0.0] - 2026-01-27
 
 ### Breaking Changes
@@ -113,6 +141,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - project-manager agent
 - key-guidelines skill
 
+[2.1.0]: https://github.com/gendosu/gendosu-claude-plugins/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/gendosu/gendosu-claude-plugins/compare/v1.0.5...v2.0.0
 [1.0.0]: https://github.com/gendosu/gendosu-claude-plugins/compare/v0.4.1...v1.0.0
 [0.4.1]: https://github.com/gendosu/gendosu-claude-plugins/releases/tag/v0.4.1
