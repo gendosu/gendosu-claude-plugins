@@ -5,6 +5,28 @@ All notable changes to the CCCP plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-01-27
+
+### Breaking Changes
+
+- **todo-task-run**: Removed PR and git push functionality - now a pure generic task runner
+  - Removed `--no-pr` and `--no-push` command arguments
+  - Removed PR creation/update functionality (use `/cccp:pull-request` separately)
+  - Removed git push operations from task execution workflow
+  - Removed git fetch from initial setup
+  - Removed `cccp:git-operations-specialist` agent type from classification rules
+  - Removed `/cccp:micro-commit` usage from task completion procedures
+
+### Changed
+
+- **todo-task-run**: Simplified to focus purely on task execution
+  - Description changed from "Execute tasks from TODO file and create pull request" to "Execute tasks from TODO file - Generic task runner"
+  - Renamed "Management phase" to "Execution phase" in workflow documentation
+  - Agent classification rules now only include Implementation Tasks and Investigation Tasks
+  - Removed Task Execution Examples section (Git operations, implementation, investigation examples)
+  - Simplified error recovery to focus on forward-only changes without commit references
+  - Japanese labels changed to English (e.g., "Git操作タスク" → removed, "実装タスク" → "Implementation Tasks")
+
 ## [1.0.5] - 2026-01-26
 
 ### Changed
@@ -91,5 +113,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - project-manager agent
 - key-guidelines skill
 
+[2.0.0]: https://github.com/gendosu/gendosu-claude-plugins/compare/v1.0.5...v2.0.0
 [1.0.0]: https://github.com/gendosu/gendosu-claude-plugins/compare/v0.4.1...v1.0.0
 [0.4.1]: https://github.com/gendosu/gendosu-claude-plugins/releases/tag/v0.4.1
