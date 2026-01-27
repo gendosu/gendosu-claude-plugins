@@ -1,6 +1,6 @@
 {
   "name": "cccp",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Git operations specialist agent and workflow commands (commit, micro-commit, pull-request, todo tasks) for Claude Code",
   "agents": [
     "./agents/git-operations-specialist.md",
@@ -8,7 +8,6 @@
   ],
   "commands": [
     "./commands/commit.md",
-    "./commands/micro-commit.md",
     "./commands/todo-task-planning.md",
     "./commands/todo-task-run.md",
     "./commands/pull-request.md"
