@@ -195,47 +195,19 @@ Promise.all([
 
 **Task tool execution example**:
 ```typescript
-Task({
+// Conceptual example - Explore agent for codebase investigation
+const exploration_result = await Task({
   subagent_type: "Explore",
   description: "Codebase exploration for [feature name]",
   prompt: `
-    # Codebase Exploration Request
+    Investigate [feature area] in the codebase.
 
-    ## Context from TODO File
-    [Related tasks and requirements extracted from TODO file]
+    Focus on: related files, dependencies, test coverage, existing patterns.
+    Thoroughness: [quick/medium/very thorough]
 
-    ## Exploration Goals
-    Find and organize the following information:
-
-    1. **Related Files**
-       - Models, controllers, views, components related to [feature area]
-       - Existing implementation patterns and similar code
-       - Configuration files and documentation
-
-    2. **Dependencies**
-       - Files that depend on and files that are depended on
-       - Import/export relationships
-       - Data flow and processing flow
-
-    3. **Test Files**
-       - Corresponding test files and test patterns
-       - Test coverage status
-
-    4. **Project Structure**
-       - Overall file structure and naming conventions
-       - Tech stack (frameworks, libraries)
-
-    ## Thoroughness
-    [quick/medium/very thorough]
-
-    ## Expected Output Format
-    - List of discovered key files (path, purpose, importance)
-    - Existing patterns and architecture
-    - Tech stack and dependencies
-    - Potential blockers and constraints
-    - Recommendations for planning phase
+    Return: key files, patterns, tech stack, blockers, recommendations.
   `
-})
+});
 ```
 
 **Saving Results**:
