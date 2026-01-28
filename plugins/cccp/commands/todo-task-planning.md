@@ -963,6 +963,18 @@ The following files MUST be created by the Main Claude executor (NOT by agents) 
       - [ ] Verify user responses were recorded in `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
       - [ ] If questions existed but AskUserQuestion was NOT executed, this is a CRITICAL ERROR - report to user
       - [ ] If no questions existed, document this fact in Phase 5 summary
+    - **Questions Processing Integrity Validation** (references Phase 3 Step 9 + Phase 4 Entrance Guard):
+      - [ ] **Cross-reference validation**: Compare questions.md file against AskUserQuestion execution history
+      - [ ] **Completeness check**: Verify ALL questions in questions.md have recorded answers
+        - ✅ **SUCCESS**: All questions have documented answers → Proceed to Step 11
+        - 🚨 **FAILURE**: One or more questions lack answers → Execute recovery procedure below
+        - ⚠️ **GRAY ZONE**: Questions marked unnecessary without documentation → Return to Phase 3 Step 9
+      - [ ] **Recovery procedure on validation failure**:
+        1. **STOP**: Halt current phase immediately
+        2. **DOCUMENT GAP**: Record which specific questions were not processed (question IDs/text)
+        3. **ROLLBACK**: Return to Phase 3 Step 9 to re-execute AskUserQuestion for missing items
+      - [ ] **Quantified success criteria**: "All questions in questions.md = All answers recorded" (1:1 mapping)
+      - [ ] **Quantified failure criteria**: "Questions count > Answers count" (gap detected)
     - **Technical Consistency Verification**: Reconfirm whether the proposed tasks are technically executable
     - **Dependency Verification**: Confirm whether dependencies between tasks are correctly set
     - **Research Rationale Verification**: Confirm whether there are any omissions in the recorded research results
@@ -985,6 +997,11 @@ The following files MUST be created by the Main Claude executor (NOT by agents) 
       - If executed: Report number of questions asked and answers received
       - If not executed: Explicitly state "No questions required" with justification
       - Report location of recorded answers: `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
+      - **Questions Processing Integrity Status**:
+        - Report validation result: SUCCESS / FAILURE / GRAY ZONE (as defined in Questions Processing Integrity Validation)
+        - If FAILURE: Report gap details (missing question count, specific IDs)
+        - If recovery executed: Report rollback to Phase 3 Step 9 and re-execution results
+        - Confirm 1:1 mapping achieved: Questions count = Answers count
     - **Technical Insights**: Report discovered technical issues, constraints, and opportunities
     - **Recommended Actions**: Concretely specify the next action items
     - **Improvement Proposals**: Propose improvements for iterative execution
