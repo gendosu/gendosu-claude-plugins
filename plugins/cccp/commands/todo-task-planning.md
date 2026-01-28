@@ -257,116 +257,18 @@ The Plan agent requires exploration results (`exploration_results.summary`, `exp
 **Task tool execution example**:
 ```typescript
 // ⚠️ IMPORTANT: This Task call MUST happen AFTER Phase 0.2 (Explore) completes
-// The exploration_results variable must be populated before calling the Plan agent
-// DO NOT call this Task in parallel with the Explore agent Task
-
 // Verify exploration_results exists before proceeding
 if (!exploration_results) {
-  throw new Error("Cannot proceed to Plan agent: exploration_results not found. Phase 0.2 must complete first.");
+  throw new Error("Cannot proceed: exploration_results not found. Phase 0.2 must complete first.");
 }
 
 Task({
   subagent_type: "Plan",
   description: "Implementation planning for [feature name]",
   prompt: `
-    # Implementation Planning Request
-
-    ## Context from Exploration Results
-
-    ### Summary
-    ${exploration_results.summary}
-
-    ### Key Files
-    ${exploration_results.files.map(f => \`- \${f.path}: \${f.purpose}\`).join('\\n')}
-
-    ### Existing Patterns
-    ${exploration_results.patterns}
-
-    ### Tech Stack
-    ${exploration_results.tech_stack}
-
-    ### Detailed Information
-    Full exploration results: docs/memory/explorations/[DATE]-[feature]-exploration.md
-
-    ## Git Workflow Requirements
-
-    ${HAS_BRANCH_OPTION ? `
-    ### Branch Creation Requirements
-    - **--branch option is specified**
-    - Branch name: \`${BRANCH_NAME}\` ${IS_AUTO_GENERATED ? '(auto-generated)' : '(user-specified)'}
-    - **IMPORTANT**: Include a task to create this branch as the **FIRST task** in the task list
-    - Task format example:
-      \`\`\`markdown
-      ### Phase 0: Branch Creation ✅
-
-      - [ ] ✅ **Create branch**
-        - Command: \`git checkout -b ${BRANCH_NAME}\`
-        - 📋 All changes will be committed to this branch
-        - Estimated time: 1 minute
-      \`\`\`
-    - **IMPORTANT**: Do NOT include 📁 file references in branch creation tasks (this is a Git operation, not a file operation)
-    - All implementation tasks should be planned assuming work will be done on this branch
-    ` : '- Branch option is not specified'}
-
-    ${HAS_PR_OPTION ? `
-    ### Pull Request Creation Requirements
-    - **--pr option is specified**
-    - **IMPORTANT**: Include a task to create a pull request as the **LAST task** in the task list
-    - The PR creation task should include:
-      - Committing all changes
-      - Creating PR description (including development reason, development content, impact)
-      - Executing \`gh pr create\` command
-    - **IMPORTANT**: Do NOT include 📁 file references in PR creation tasks (this is a Git operation, not a file operation)
-    - If PR template instructions exist in CLAUDE.md or similar files, specify to follow them
-    ` : '- PR option is not specified'}
-
-    ## Planning Goals
-    Design a detailed plan to implement the following feature:
-    [Feature description]
-
-    ## Items to Include in Plan
-
-    1. **Implementation Approach**
-       - Overall implementation strategy (2-3 paragraphs)
-       - Selected architecture patterns
-       - Alignment with existing codebase
-
-    2. **Step-by-Step Tasks**
-       - Specific implementation steps
-       - Deliverables for each step
-       - Dependencies and execution order
-       - **IMPORTANT**: If --branch option is specified, include branch creation task first
-       - **IMPORTANT**: If --pr option is specified, include PR creation task last
-       - **Git Commit Task Description Rules**:
-         - ❌ Avoid: Writing detailed git commands (e.g., \`git add file && git commit -m "message"\`)
-         - ✅ Recommended: Write only concise instruction \`Execute cccp:micro-commit\`
-         - Reason: cccp:micro-commit automatically creates appropriate context-based commits
-
-    3. **Critical Files**
-       - Files that need to be created or modified
-       - Role and changes for each file
-
-    4. **Trade-offs and Decisions**
-       - Comparison when multiple options exist
-       - Reasons and rationale for selection
-
-    5. **Risks and Mitigation**
-       - Technical risks
-       - Impact on performance, security, maintainability
-       - Measures to mitigate risks
-
-    6. **Feasibility Assessment**
-       Attach the following markers to each task:
-       - ✅ Ready: Clear specs, technical issues clarified, immediately executable
-       - ⏳ Pending: Waiting for dependencies (specify concrete waiting reason and release condition)
-       - 🔍 Research: Research required (specify concrete research items and methods)
-       - 🚧 Blocked: Specs/technical details unclear (specify concrete blockers and resolution steps)
-
-    ## Deliverable Format
-    - Markdown document
-    - Task list in checklist format
-    - 📁 icon for file references
-    - 📊 icon for technical rationale
+    Create detailed implementation plan using exploration results.
+    Include: approach, step-by-step tasks, critical files, trade-offs, risks, feasibility assessment.
+    Context: ${exploration_results.summary}
   `
 })
 ```
