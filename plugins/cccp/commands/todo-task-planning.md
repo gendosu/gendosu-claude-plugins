@@ -709,24 +709,87 @@ Task({
    - **docs/memory Reference Information**: Record file paths of related research and analysis results
 
 9. **AskUserQuestion Tool Execution (MANDATORY BEFORE PHASE 4)**
-   - **🚨 CRITICAL**: If questions were extracted in step 6, you MUST execute AskUserQuestion tool before proceeding to Phase 4
-   - **Execution Conditions**:
-     - If `strategic_plan.user_questions` exists and contains questions → MUST execute AskUserQuestion
-     - If questions were extracted during Phase 3 analysis → MUST execute AskUserQuestion
-     - If there are unclear specifications or multiple valid approaches → MUST execute AskUserQuestion
-   - **Execution Steps**:
-     - [ ] Present each question using AskUserQuestion tool with structured options (2-4 choices)
-     - [ ] Set concise headers (max 12 chars) for each question
-     - [ ] Include clear descriptions explaining each option's implications
-     - [ ] Use multiSelect: true when multiple answers can be selected
-     - [ ] Wait for user responses - DO NOT proceed to Phase 4 until answered
-   - **After Receiving Answers**:
-     - [ ] Record user responses in `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
-     - [ ] Update task planning based on user decisions
-     - [ ] Resolve any 🚧 Blocked or 🔍 Research tasks that depended on answers
-   - **If No Questions**:
-     - If there are genuinely no questions or uncertainties, proceed directly to Phase 4
-     - Document in Phase 5 summary why no questions were needed
+
+   **⚠️ CRITICAL EXECUTION POLICY**:
+
+   This step enforces a mandatory question extraction and user interaction checkpoint. You MUST evaluate execution conditions and follow the corresponding workflow.
+
+   ### Execution Condition Decision Flow
+
+   ```
+   IF (questions extracted in step 6) THEN
+       → CONDITION A: Execute AskUserQuestion tool (MANDATORY)
+   ELSE
+       → CONDITION B: No questions exist (MANDATORY documentation required)
+   END IF
+   ```
+
+   ---
+
+   ### CONDITION A: Questions Exist (MANDATORY Execution)
+
+   **Triggers**:
+   - `strategic_plan.user_questions` exists and contains questions
+   - Questions were extracted during Phase 3 analysis
+   - Unclear specifications or multiple valid approaches identified
+
+   **🚨 MANDATORY**: You MUST execute AskUserQuestion tool before proceeding to Phase 4
+
+   **Execution Steps**:
+   - [ ] Present each question using AskUserQuestion tool with **required parameters**:
+     - `header` (string, max 12 chars): Concise question identifier
+     - `question` (string): Clear question text with context
+     - `options` (array): 2-4 structured choice objects with:
+       - `label` (string): Short option identifier
+       - `description` (string): Explain implications of each choice
+     - `multiSelect` (boolean): Set `true` when multiple answers can be selected
+   - [ ] Wait for user responses - **DO NOT proceed to Phase 4 until answered**
+   - [ ] Validate that all questions received responses
+
+   **After Receiving Answers**:
+   - [ ] **MANDATORY**: Record user responses in `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
+     - Format: Structured markdown with question headers, selected options, and rationale
+     - Example structure:
+       ```markdown
+       # User Decisions - [Feature Name]
+       Date: YYYY-MM-DD
+
+       ## Question 1: [Header]
+       **Selected**: [Option Label]
+       **Rationale**: [Why this choice was made]
+
+       ## Question 2: [Header]
+       **Selected**: [Option Label(s)]
+       **Rationale**: [Decision context]
+       ```
+   - [ ] Update task planning based on user decisions
+   - [ ] Resolve any 🚧 Blocked or 🔍 Research tasks that depended on answers
+
+   **Error Handling**:
+   - If AskUserQuestion tool fails → **STOP execution** and report error to user
+   - If questions.md file creation fails → Retry once, then escalate to user
+   - Do NOT proceed to Phase 4 if any question remains unanswered
+
+   ---
+
+   ### CONDITION B: No Questions (MANDATORY Documentation)
+
+   **⚠️ MANDATORY**: If there are genuinely no questions or uncertainties:
+   - [ ] Proceed directly to Phase 4
+   - [ ] **REQUIRED**: Document in Phase 5 summary why no questions were needed
+   - [ ] Explain what made the requirements clear enough to skip user interaction
+
+   ---
+
+   ### Why This Matters
+
+   **Risks of Skipping Questions**:
+   - **Incorrect Assumptions**: Proceeding without clarification can lead to implementing wrong features or using inappropriate technical approaches
+   - **Wasted Development Effort**: Building features based on misunderstood requirements results in rework and delays
+   - **Context Loss**: Without recorded user decisions, future maintainers cannot understand why specific implementation choices were made
+   - **User Misalignment**: Skipping user validation means missed opportunities to catch requirement mismatches early
+
+   This checkpoint ensures alignment between user intent and implementation strategy before significant development effort begins.
 
 ### Phase 4: $ARGUMENTS File Update
 
