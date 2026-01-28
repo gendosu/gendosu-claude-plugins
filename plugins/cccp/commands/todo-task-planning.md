@@ -791,6 +791,59 @@ Task({
 
    This checkpoint ensures alignment between user intent and implementation strategy before significant development effort begins.
 
+---
+
+## 🚨 CRITICAL GATE: MANDATORY PHASE 4 ENTRANCE REQUIREMENTS
+
+**PURPOSE**: Prevent execution of Phase 4 without completing Phase 3 question processing when questions exist.
+
+### Checkpoint 1: Questions Processing Status
+
+**Verification Point**: Before entering Phase 4, verify the execution state of Phase 3 Step 9 conditions.
+
+**Required Verification**:
+- [ ] Check if `strategic_plan.user_questions` exists (from Phase 3 Step 6)
+- [ ] If questions exist, verify AskUserQuestion tool was executed
+- [ ] Confirm all questions received user responses
+
+### Checkpoint 2: Evidence Verification
+
+**File System Evidence**:
+
+```
+IF questions were extracted in Phase 3 Step 6 THEN
+    → Expected: docs/memory/questions/YYYY-MM-DD-[feature]-answers.md file EXISTS
+    → Status: AskUserQuestion tool MUST have been executed
+ELSE
+    → Expected: No questions.md file (questions did not exist)
+    → Status: AskUserQuestion tool execution NOT required
+END IF
+```
+
+**⚠️ Truth Table: PASS/FAIL Criteria**
+
+| questions.md Expected | AskUserQuestion Executed | Result | Action |
+|----------------------|--------------------------|--------|---------|
+| ✅ Yes (questions exist) | ✅ Yes (tool executed) | **PASS** | Proceed to Phase 4 |
+| ✅ Yes (questions exist) | ❌ No (tool NOT executed) | **FAIL** | Return to Phase 3 Step 9 |
+| ❌ No (no questions) | ❌ No (tool NOT executed) | **PASS** | Proceed to Phase 4 |
+| ❌ No (no questions) | ✅ Yes (tool executed) | **ANOMALY** | Investigate logic error |
+
+### Action on Failure
+
+**IF Checkpoint FAILS** (questions exist but AskUserQuestion was not executed):
+
+1. **STOP immediately** - Do NOT proceed to Phase 4
+2. **Return to Phase 3 Step 9** - Execute CONDITION A as defined in Phase 3 Step 9
+3. **Execute AskUserQuestion tool** - Present all questions to user
+4. **Wait for responses** - Do NOT continue until all questions are answered
+5. **Create questions.md file** - Document user responses in `docs/memory/questions/`
+6. **Re-verify** - Return to this checkpoint and verify PASS criteria
+
+**WHY THIS MATTERS**: Skipping user question validation causes cascading failures in Phase 5 verification (questions.md file will be missing when expected) and risks misalignment between implementation and user intent.
+
+---
+
 ### Phase 4: $ARGUMENTS File Update
 
 **⚠️ MANDATORY PRECONDITION**: All questions extracted in Phase 3 MUST be answered via AskUserQuestion tool before starting this phase. If questions exist but were not answered, STOP and return to Phase 3 step 9.
