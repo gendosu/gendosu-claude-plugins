@@ -5,6 +5,18 @@ All notable changes to the CCCP plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-01-28
+
+### Fixed
+
+- **todo-task-planning**: Phase 3 Step 9 (AskUserQuestion execution) now enforced by triple-layer verification mechanism
+  - Layer 1: Enhanced execution conditions with clear IF-THEN-ELSE flow (commit 810d843)
+  - Layer 2: Added Phase 4 entrance guard with mandatory checkpoint verification (commit 00e038b)
+  - Layer 3: Added Phase 5 comprehensive validation framework with recovery procedures (commit 235035c)
+- **todo-task-planning**: Prevented proceeding to Phase 4 without proper question processing
+  - Phase 4 now includes entrance guard that blocks execution if AskUserQuestion was not executed
+  - Added validation checkpoint requiring user_answered: true before TODO.md updates
+
 ## [2.0.0] - 2026-01-27
 
 ### Breaking Changes
@@ -113,6 +125,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - project-manager agent
 - key-guidelines skill
 
+[2.0.1]: https://github.com/gendosu/gendosu-claude-plugins/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/gendosu/gendosu-claude-plugins/compare/v1.0.5...v2.0.0
 [1.0.0]: https://github.com/gendosu/gendosu-claude-plugins/compare/v0.4.1...v1.0.0
 [0.4.1]: https://github.com/gendosu/gendosu-claude-plugins/releases/tag/v0.4.1

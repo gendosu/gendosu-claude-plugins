@@ -709,24 +709,140 @@ Task({
    - **docs/memory Reference Information**: Record file paths of related research and analysis results
 
 9. **AskUserQuestion Tool Execution (MANDATORY BEFORE PHASE 4)**
-   - **🚨 CRITICAL**: If questions were extracted in step 6, you MUST execute AskUserQuestion tool before proceeding to Phase 4
-   - **Execution Conditions**:
-     - If `strategic_plan.user_questions` exists and contains questions → MUST execute AskUserQuestion
-     - If questions were extracted during Phase 3 analysis → MUST execute AskUserQuestion
-     - If there are unclear specifications or multiple valid approaches → MUST execute AskUserQuestion
-   - **Execution Steps**:
-     - [ ] Present each question using AskUserQuestion tool with structured options (2-4 choices)
-     - [ ] Set concise headers (max 12 chars) for each question
-     - [ ] Include clear descriptions explaining each option's implications
-     - [ ] Use multiSelect: true when multiple answers can be selected
-     - [ ] Wait for user responses - DO NOT proceed to Phase 4 until answered
-   - **After Receiving Answers**:
-     - [ ] Record user responses in `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
-     - [ ] Update task planning based on user decisions
-     - [ ] Resolve any 🚧 Blocked or 🔍 Research tasks that depended on answers
-   - **If No Questions**:
-     - If there are genuinely no questions or uncertainties, proceed directly to Phase 4
-     - Document in Phase 5 summary why no questions were needed
+
+   **⚠️ CRITICAL EXECUTION POLICY**:
+
+   This step enforces a mandatory question extraction and user interaction checkpoint. You MUST evaluate execution conditions and follow the corresponding workflow.
+
+   ### Execution Condition Decision Flow
+
+   ```
+   IF (questions extracted in step 6) THEN
+       → CONDITION A: Execute AskUserQuestion tool (MANDATORY)
+   ELSE
+       → CONDITION B: No questions exist (MANDATORY documentation required)
+   END IF
+   ```
+
+   ---
+
+   ### CONDITION A: Questions Exist (MANDATORY Execution)
+
+   **Triggers**:
+   - `strategic_plan.user_questions` exists and contains questions
+   - Questions were extracted during Phase 3 analysis
+   - Unclear specifications or multiple valid approaches identified
+
+   **🚨 MANDATORY**: You MUST execute AskUserQuestion tool before proceeding to Phase 4
+
+   **Execution Steps**:
+   - [ ] Present each question using AskUserQuestion tool with **required parameters**:
+     - `header` (string, max 12 chars): Concise question identifier
+     - `question` (string): Clear question text with context
+     - `options` (array): 2-4 structured choice objects with:
+       - `label` (string): Short option identifier
+       - `description` (string): Explain implications of each choice
+     - `multiSelect` (boolean): Set `true` when multiple answers can be selected
+   - [ ] Wait for user responses - **DO NOT proceed to Phase 4 until answered**
+   - [ ] Validate that all questions received responses
+
+   **After Receiving Answers**:
+   - [ ] **MANDATORY**: Record user responses in `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
+     - Format: Structured markdown with question headers, selected options, and rationale
+     - Example structure:
+       ```markdown
+       # User Decisions - [Feature Name]
+       Date: YYYY-MM-DD
+
+       ## Question 1: [Header]
+       **Selected**: [Option Label]
+       **Rationale**: [Why this choice was made]
+
+       ## Question 2: [Header]
+       **Selected**: [Option Label(s)]
+       **Rationale**: [Decision context]
+       ```
+   - [ ] Update task planning based on user decisions
+   - [ ] Resolve any 🚧 Blocked or 🔍 Research tasks that depended on answers
+
+   **Error Handling**:
+   - If AskUserQuestion tool fails → **STOP execution** and report error to user
+   - If questions.md file creation fails → Retry once, then escalate to user
+   - Do NOT proceed to Phase 4 if any question remains unanswered
+
+   ---
+
+   ### CONDITION B: No Questions (MANDATORY Documentation)
+
+   **⚠️ MANDATORY**: If there are genuinely no questions or uncertainties:
+   - [ ] Proceed directly to Phase 4
+   - [ ] **REQUIRED**: Document in Phase 5 summary why no questions were needed
+   - [ ] Explain what made the requirements clear enough to skip user interaction
+
+   ---
+
+   ### Why This Matters
+
+   **Risks of Skipping Questions**:
+   - **Incorrect Assumptions**: Proceeding without clarification can lead to implementing wrong features or using inappropriate technical approaches
+   - **Wasted Development Effort**: Building features based on misunderstood requirements results in rework and delays
+   - **Context Loss**: Without recorded user decisions, future maintainers cannot understand why specific implementation choices were made
+   - **User Misalignment**: Skipping user validation means missed opportunities to catch requirement mismatches early
+
+   This checkpoint ensures alignment between user intent and implementation strategy before significant development effort begins.
+
+---
+
+## 🚨 CRITICAL GATE: MANDATORY PHASE 4 ENTRANCE REQUIREMENTS
+
+**PURPOSE**: Prevent execution of Phase 4 without completing Phase 3 question processing when questions exist.
+
+### Checkpoint 1: Questions Processing Status
+
+**Verification Point**: Before entering Phase 4, verify the execution state of Phase 3 Step 9 conditions.
+
+**Required Verification**:
+- [ ] Check if `strategic_plan.user_questions` exists (from Phase 3 Step 6)
+- [ ] If questions exist, verify AskUserQuestion tool was executed
+- [ ] Confirm all questions received user responses
+
+### Checkpoint 2: Evidence Verification
+
+**File System Evidence**:
+
+```
+IF questions were extracted in Phase 3 Step 6 THEN
+    → Expected: docs/memory/questions/YYYY-MM-DD-[feature]-answers.md file EXISTS
+    → Status: AskUserQuestion tool MUST have been executed
+ELSE
+    → Expected: No questions.md file (questions did not exist)
+    → Status: AskUserQuestion tool execution NOT required
+END IF
+```
+
+**⚠️ Truth Table: PASS/FAIL Criteria**
+
+| questions.md Expected | AskUserQuestion Executed | Result | Action |
+|----------------------|--------------------------|--------|---------|
+| ✅ Yes (questions exist) | ✅ Yes (tool executed) | **PASS** | Proceed to Phase 4 |
+| ✅ Yes (questions exist) | ❌ No (tool NOT executed) | **FAIL** | Return to Phase 3 Step 9 |
+| ❌ No (no questions) | ❌ No (tool NOT executed) | **PASS** | Proceed to Phase 4 |
+| ❌ No (no questions) | ✅ Yes (tool executed) | **ANOMALY** | Investigate logic error |
+
+### Action on Failure
+
+**IF Checkpoint FAILS** (questions exist but AskUserQuestion was not executed):
+
+1. **STOP immediately** - Do NOT proceed to Phase 4
+2. **Return to Phase 3 Step 9** - Execute CONDITION A as defined in Phase 3 Step 9
+3. **Execute AskUserQuestion tool** - Present all questions to user
+4. **Wait for responses** - Do NOT continue until all questions are answered
+5. **Create questions.md file** - Document user responses in `docs/memory/questions/`
+6. **Re-verify** - Return to this checkpoint and verify PASS criteria
+
+**WHY THIS MATTERS**: Skipping user question validation causes cascading failures in Phase 5 verification (questions.md file will be missing when expected) and risks misalignment between implementation and user intent.
+
+---
 
 ### Phase 4: $ARGUMENTS File Update
 
@@ -847,6 +963,93 @@ The following files MUST be created by the Main Claude executor (NOT by agents) 
       - [ ] Verify user responses were recorded in `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
       - [ ] If questions existed but AskUserQuestion was NOT executed, this is a CRITICAL ERROR - report to user
       - [ ] If no questions existed, document this fact in Phase 5 summary
+    - **Questions Processing Integrity Validation** (references Phase 3 Step 9 + Phase 4 Entrance Guard):
+      - [ ] **Cross-reference validation**: Compare questions.md file against AskUserQuestion execution history
+      - [ ] **Completeness check**: Verify ALL questions in questions.md have recorded answers
+        - ✅ **SUCCESS**: All questions have documented answers → Proceed to Step 11
+        - 🚨 **FAILURE**: One or more questions lack answers → Execute recovery procedure below
+        - ⚠️ **GRAY ZONE**: Questions marked unnecessary without documentation → Return to Phase 3 Step 9
+      - [ ] **Recovery procedure on validation failure**:
+
+        **STEP 1: STOP Processing**
+        - [ ] Halt Phase 5 Step 11 immediately - Do NOT proceed to final summary
+        - [ ] Suspend all pending verification tasks
+        - [ ] Mark current execution as "RECOVERY MODE"
+
+        **STEP 2: DOCUMENT GAP (Evidence Collection)**
+        - [ ] Identify missing questions by comparing:
+          - Source: `docs/memory/questions/YYYY-MM-DD-[feature]-questions.md` (expected questions)
+          - Target: `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md` (recorded answers)
+        - [ ] Create gap analysis report with:
+          - Total questions count: [N]
+          - Answered questions count: [M]
+          - Missing questions count: [N - M]
+          - Specific missing question IDs/text: [List each unanswered question]
+        - [ ] Record gap in execution log with timestamp and context
+
+        **STEP 3: ROLLBACK to Phase 3 Step 9**
+        - [ ] Navigate to Phase 3 Step 9: "Questions Extraction and User Interaction"
+        - [ ] Execute CONDITION A with **ONLY missing questions**:
+          - Load unanswered questions from gap analysis
+          - Execute AskUserQuestion tool for each missing question
+          - Wait for user responses (do NOT proceed without answers)
+          - Append new answers to existing answers.md file (preserve previous answers)
+        - [ ] **Verification after rollback**:
+          - Re-run completeness check (questions count = answers count)
+          - Confirm 1:1 mapping achieved
+          - If still failing → Escalate to user with detailed error report
+
+        **STEP 4: RESUME Phase 5**
+        - [ ] Return to Phase 5 Step 11 verification point
+        - [ ] Re-execute "Questions Processing Integrity Validation"
+        - [ ] Expected result: SUCCESS (all questions answered)
+        - [ ] Continue to Step 12 (Comprehensive Execution Summary)
+
+        **Common Failure Scenarios**:
+        - **Scenario 1**: AskUserQuestion tool was executed but answers.md file was not created
+          - Root cause: File write failure or incorrect file path
+          - Recovery: Re-execute AskUserQuestion, verify file creation explicitly
+        - **Scenario 2**: Some questions were skipped during Phase 3 execution
+          - Root cause: Conditional logic error or incomplete iteration
+          - Recovery: Compare questions.md line-by-line against answers.md entries
+        - **Scenario 3**: Answers file exists but contains incomplete responses
+          - Root cause: User response not properly recorded or partial execution
+          - Recovery: Identify incomplete entries, re-ask specific questions
+        - **Scenario 4**: Questions file was updated after answers were recorded
+          - Root cause: Phase 3 re-execution without Phase 4 entrance guard check
+          - Recovery: Use timestamp comparison, re-ask only newly added questions
+      - [ ] **Quantified Validation Criteria Matrix**:
+
+        **📊 Measurable Success/Failure Thresholds**
+
+        | Metric | Measurement Method | Success Threshold | Failure Threshold |
+        |--------|-------------------|-------------------|-------------------|
+        | **Question Count** | `grep -c "^##" questions.md` | N questions | N questions |
+        | **Answer Count** | `grep -c "^##" answers.md` | N answers | M answers (M < N) |
+        | **1:1 Mapping** | `question_count == answer_count` | ✅ True | ❌ False |
+        | **Completeness** | All questions have non-empty answers | ✅ 100% | ❌ <100% |
+        | **File Existence** | Both questions.md and answers.md exist | ✅ Both exist | ❌ Missing answers.md |
+
+        **⚠️ Validation Decision Matrix**
+
+        | Questions Exist | Answers File Exists | Question Count == Answer Count | All Answers Complete | Verdict | Action |
+        |----------------|--------------------|---------------------------------|---------------------|---------|--------|
+        | ✅ Yes | ✅ Yes | ✅ Yes (1:1 mapping) | ✅ Yes (100%) | **SUCCESS** | Proceed to Step 11 |
+        | ✅ Yes | ✅ Yes | ✅ Yes (1:1 mapping) | ❌ No (incomplete) | **FAILURE** | Execute recovery procedure |
+        | ✅ Yes | ✅ Yes | ❌ No (gap exists) | N/A | **FAILURE** | Execute recovery procedure |
+        | ✅ Yes | ❌ No | N/A | N/A | **FAILURE** | Execute recovery procedure |
+        | ✅ Yes | ⚠️ Yes (but empty) | ❌ No (0 answers) | ❌ No | **FAILURE** | Execute recovery procedure |
+        | ❌ No | ❌ No | N/A | N/A | **SUCCESS** | No questions needed, proceed |
+        | ❌ No | ✅ Yes | N/A | N/A | **ANOMALY** | Investigate unexpected answers file |
+
+        **🔍 Gray Zone Scenarios** (Require Human Judgment → Return to Phase 3 Step 9)
+
+        | Scenario | Detection Method | Indicator | Resolution |
+        |----------|------------------|-----------|------------|
+        | **Questions marked unnecessary** | Questions file exists but answers file states "No questions needed" | answers.md contains disclaimer instead of 1:1 answers | Return to Phase 3 Step 9 to re-evaluate necessity |
+        | **Partial execution claim** | Question count matches answer count, but answers contain TODO/placeholder text | Answers contain strings like "TBD", "[待機中]", "TODO" | Execute recovery procedure to complete answers |
+        | **Timestamp mismatch** | Questions file modified after answers file created | `questions.md mtime > answers.md mtime` | Return to Phase 3 Step 9 to process new questions |
+        | **Format inconsistency** | Question headers don't match answer headers | Header text mismatch between files | Execute recovery procedure to align headers |
     - **Technical Consistency Verification**: Reconfirm whether the proposed tasks are technically executable
     - **Dependency Verification**: Confirm whether dependencies between tasks are correctly set
     - **Research Rationale Verification**: Confirm whether there are any omissions in the recorded research results
@@ -869,6 +1072,11 @@ The following files MUST be created by the Main Claude executor (NOT by agents) 
       - If executed: Report number of questions asked and answers received
       - If not executed: Explicitly state "No questions required" with justification
       - Report location of recorded answers: `docs/memory/questions/YYYY-MM-DD-[feature]-answers.md`
+      - **Questions Processing Integrity Status**:
+        - Report validation result: SUCCESS / FAILURE / GRAY ZONE (as defined in Questions Processing Integrity Validation)
+        - If FAILURE: Report gap details (missing question count, specific IDs)
+        - If recovery executed: Report rollback to Phase 3 Step 9 and re-execution results
+        - Confirm 1:1 mapping achieved: Questions count = Answers count
     - **Technical Insights**: Report discovered technical issues, constraints, and opportunities
     - **Recommended Actions**: Concretely specify the next action items
     - **Improvement Proposals**: Propose improvements for iterative execution
