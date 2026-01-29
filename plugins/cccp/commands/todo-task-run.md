@@ -41,6 +41,7 @@ The `/cccp:todo-task-run` command is designed as a **generic task runner** - it 
 - **Continuous Operation**: Continue executing tasks until completion or blocker - NEVER stop prematurely
 - **Not for planning**: This command does NOT create tasks or convert requirements into actionable items
 - **Task planning**: Use `/cccp:todo-task-planning` to convert requirements into a structured TODO.md before using this command
+- **Task Runner Focus**: Act as a task runner, delegating individual work to sub-agents as much as possible
 
 ### Execution Guarantee
 This command guarantees:
@@ -62,7 +63,7 @@ This command guarantees:
 
 **⚠️ CRITICAL EXECUTION POLICY**:
 
-This command MUST execute ALL tasks in TODO.md sequentially until completion:
+This command MUST execute ALL tasks in TODO.md sequentially, completing every task:
 - ✅ **Execute tasks one by one** in the order they appear
 - ✅ **After each task completion, check for remaining incomplete tasks**
 - ✅ **Continue executing until ALL tasks are marked `- [x]`**

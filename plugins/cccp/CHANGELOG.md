@@ -5,6 +5,14 @@ All notable changes to the CCCP plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-01-29
+
+### Changed
+
+- **todo-task-run**: Enhanced task runner guidelines to emphasize delegation focus
+  - Added explicit guidance to delegate individual work to sub-agents as much as possible
+  - Refined critical execution policy description for clarity
+
 ## [2.1.1] - 2026-01-29
 
 ### Removed
