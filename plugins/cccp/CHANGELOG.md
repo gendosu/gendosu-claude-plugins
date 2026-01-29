@@ -5,6 +5,26 @@ All notable changes to the CCCP plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-01-29
+
+### Added
+
+- **todo-output-template**: New skill file for TODO.md output template examples
+  - Complete 82-line template with structure documentation
+  - Accessible via `/cccp:todo-output-template` command
+  - Extracted from todo-task-planning.md for better maintainability (commit 02b3b5d)
+
+### Changed
+
+- **todo-task-planning**: Simplified documentation from 1,270 lines to 974 lines (23.3% reduction)
+  - TypeScript implementation examples reduced by 79.6% (203 lines) while preserving conceptual patterns
+    - Explore Agent example: 42→13 lines (commit c034686)
+    - Plan Agent example: 115→15 lines (commit 623179a)
+    - Project Manager Agent example: 98→24 lines (commit 24addd2)
+  - Verification matrices consolidated from 4 matrices to 2 checklists (23 lines reduction) (commit 743665e)
+  - Output template replaced with reference to new skill file (72 lines reduction) (commit e7cd820)
+  - All critical sections preserved: Phase 0.5 requirements, security patterns, essential verification points
+
 ## [2.0.1] - 2026-01-28
 
 ### Fixed
