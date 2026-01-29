@@ -963,83 +963,12 @@ const strategic_plan = await Task({
 
 ## 📋 Output Format Example
 
-**Note**: The following is an example when `--branch` option is specified. In practice, include only tasks directly necessary to achieve the objective.
+The TODO.md file follows a structured template with task breakdown, user answers, and reference documentation. Tasks are categorized by readiness status (✅ Ready, ⏳ Pending, 🔍 Research, 🚧 Blocked) with hierarchical checkboxes, time estimates, and dependencies.
 
-**Differences by Option**:
-- **`--branch` only**: Phase 0 (Branch Creation) is added, Phase 4 (PR and Merge) is NOT added
-- **`--pr`**: Both Phase 0 (Branch Creation) and Phase 4 (PR and Merge) are added
-- **No options**: Neither Phase 0 nor Phase 4 is added
+**Complete Template with Examples**: See `/cccp:todo-output-template` skill or `plugins/cccp/skills/todo-output-template/SKILL.md`
 
-```markdown
-## 📊 Thorough Execution Summary
-- [ ] **Research Performance**: 18 files and 5 directories researched and completed
-- [ ] **Technical Analysis**: Confirmed Nuxt.js 3.x + MySQL configuration
-- [ ] New tasks: 6 (✅3, ⏳1, 🔍1, 🚧1)
-- [ ] **Research Rationale**: Detailed analysis of 8 files, confirmation of 3 technical constraints
-- [ ] **Duplicate Check**: Avoided duplication of 4 past researches, 2 questions, 1 task
-- [ ] **docs/memory saved**: analysis/2025-01-15-auth-flow.md, questions/auth-questions.md
-- [x] **Updated file**: $ARGUMENTS file (directly updated and verified)
-
-## 📋 Task List (Complete Checklist Format)
-
-### Phase 0: ブランチ作成 ✅ (when --branch option is specified)
-
-- [ ] ✅ **ブランチを作成**
-  - コマンド: `git checkout -b feature/actionlog-notification`
-  - 📋 このブランチで全ての変更をコミット
-  - 推定時間: 1分
-
-### 🎯 Ready Tasks (✅ Immediately Executable)
-- [ ] ✅ API authentication system implementation 📁`src/api/auth/` 📊Authentication flow confirmed
-  - [ ] Implement login endpoint - Create `auth/login.ts`
-    - 💡 Use Express.js POST handler pattern from `auth/register.ts`
-    - 💡 Validate credentials with bcrypt, generate JWT token
-    - 💡 Return { token, user } on success, 401 on failure
-  - [ ] Implement token verification middleware - Create `middleware/auth.ts`
-    - 💡 Follow middleware pattern in `middleware/logger.ts`
-    - 💡 Use jsonwebtoken.verify() to validate token from Authorization header
-    - 💡 Attach decoded user to req.user for downstream handlers
-  - [ ] Add session management - Extend `utils/session.ts`
-    - 💡 Add createSession() and destroySession() methods
-    - 💡 Use Redis client pattern from `utils/cache.ts`
-- [ ] ✅ Database schema update 📁`prisma/schema.prisma` 📊MySQL support
-  - [ ] Update Prisma schema - Add new model definitions
-    - 💡 Follow existing User model pattern (id, createdAt, updatedAt fields)
-    - 💡 Add Session model with userId foreign key relation
-  - [ ] Generate migration - Execute `npx prisma migrate dev`
-    - 💡 Run after schema changes, provide descriptive migration name
-- [🔄] ✅ User profile page implementation 📁`pages/user/profile.vue` - In progress
-  - [x] Basic profile display ✓ `components/UserProfile.vue` completed
-  - [ ] Add profile edit functionality - Create `components/UserProfileEdit.vue`
-    - 💡 Copy form structure from `components/UserProfile.vue`
-    - 💡 Add v-model bindings for editable fields (name, email, bio)
-    - 💡 Call PATCH /api/user/:id with updated data on submit
-- [ ] ✅ Commit after implementation complete
-  - 💡 Execute cccp:micro-commit to commit changes by context
-  - 💡 Estimated time: 2-3 minutes
-
-### ⏳ Pending Tasks (Waiting for Dependencies)
-- [ ] ⏳ Frontend UI integration 📁`components/` - After API completion (waiting for `auth/login.ts` completion)
-  - [ ] Login form component - Create `components/LoginForm.vue`
-  - [ ] API client setup - Configure `composables/useApi.ts`
-
-### 🔍 Research Tasks (Research Required)
-- [ ] 🔍 Third-party API integration 📊To research: API documentation and authentication method
-  - [ ] Review API documentation - Check endpoints and rate limits
-  - [ ] Determine authentication approach - OAuth vs API key
-
-### 🚧 Blocked Tasks (Blocked)
-- [ ] 🚧 Payment integration 📊Blocking factor: Payment provider not decided, Stripe vs PayPal
-  - [ ] Payment provider selection - Compare pricing and features
-  - [ ] Payment flow design - Determine checkout process
-
-## ❓ Questions Requiring Confirmation (Checklist Format with Research Rationale)
-- [ ] [Specification] What authentication method should be used? 📊Current status: Session-based auth implemented, token-based TBD
-- [ ] [UI] What is the design system color palette? 📊Current status: Basic Tailwind config, custom theme not set
-- [ ] [UX] What are the detailed specifications of the user flow? 📊Current status: Only basic authentication flow implemented
-
-## 🎯 Next Actions (Checklist Format)
-- [ ] Collect answers to blocker questions, confirm authentication approach
-- [ ] Start implementation from ✅Ready tasks, progress step-by-step
-- [ ] Confirm and adjust dependencies
-```
+**Key Sections**:
+- **Execution Summary**: Research performance, technical analysis, duplicate checks, memory file references
+- **Task List**: Phase-based breakdown with status indicators, file locations, implementation hints
+- **Questions**: Checklist format with research rationale and current status
+- **Next Actions**: Prioritized action items based on task readiness
