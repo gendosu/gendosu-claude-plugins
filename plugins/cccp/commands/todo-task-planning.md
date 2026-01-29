@@ -323,94 +323,20 @@ Task({
     # Strategic Project Planning Request
 
     ## Context
-
-    ### Exploration Results Summary
-    ${exploration_results.summary}
-
-    Details: docs/memory/explorations/[DATE]-[feature]-exploration.md
-
-    ### Planning Results Summary
-    ${planning_results.approach_summary}
-
-    Task count: ${planning_results.tasks.length}
-    Details: docs/memory/planning/[DATE]-[feature]-plan.md
+    Exploration results: ${exploration_results.summary}
+    Planning results: ${planning_results.approach_summary}
 
     ## Goals
+    1. Organize tasks by feasibility (✅⏳🔍🚧)
+    2. Extract user questions with structured options
+    3. Prepare checklist structure with file references (📁) and rationale (📊)
+    4. Apply YAGNI principle validation
 
-    1. **Organization by Feasibility**
-       - Prioritize ✅ Ready tasks
-       - Clarify dependencies of ⏳ Pending tasks
-       - Create research plan for 🔍 Research tasks
-       - Propose solutions for 🚧 Blocked tasks
-
-    2. **User Question Extraction**
-       - Points where specs are unclear
-       - Points with technical choices
-       - Points requiring UI/UX decisions
-       - Prepare structured options for use with AskUserQuestion tool
-
-    3. **Checklist Structure Preparation**
-       - Task list in checklist format (\`- [ ]\`)
-       - Feasibility markers on each task (✅⏳🔍🚧)
-       - **For implementation tasks with file operations**: Include file references (📁) and rationale (📊)
-       - **For tasks without file operations** (branch creation, PR creation, Git operations, etc.): Do NOT include file references (📁)
-       - Nested subtasks (2-space indent)
-       - **Git Commit Task Description Rules**:
-         - ❌ Avoid: Writing detailed git commands (e.g., \`git add Gemfile.lock && git commit -m "..."\`)
-         - ✅ Recommended: Write only concise instruction \`Execute cccp:micro-commit\`
-         - Reason: cccp:micro-commit automatically creates appropriate context-based commits, so manual git commands are not needed
-       - **Task Granularity Requirements**:
-         - Each task targets one file or one feature
-         - Tasks are completable in 30 min - 2 hours
-         - Dependencies are clearly identifiable
-         - Avoid overly broad tasks without specific targets
-
-    4. **YAGNI Principle Validation**
-       - Include only tasks directly necessary for the objective
-       - Exclude the following:
-         - Refactoring (improving or organizing existing code)
-         - Adding or enhancing logs
-         - Adding tests (supplementing tests for existing features)
-         - Strengthening error handling (improving existing features)
-         - Adding or updating documentation
-         - Performance optimization
-         - Code quality improvement
-         - Security strengthening (when not essential for new features)
-         - Additional work for pursuing perfection
-
-    ## Expected Deliverables
-
-    1. **tasks_by_feasibility**
-       ```typescript
-       {
-         ready: Task[],      // ✅ Immediately executable
-         pending: Task[],    // ⏳ Waiting for dependencies
-         research: Task[],   // 🔍 Research required
-         blocked: Task[]     // 🚧 Blocked
-       }
-       ```
-
-    2. **user_questions**
-       ```typescript
-       {
-         question: string,
-         header: string,  // max 12 chars
-         options: [
-           { label: string, description: string }
-         ],
-         multiSelect: boolean
-       }[]
-       ```
-
-    3. **checklist_structure**
-       - Complete task structure in checklist format
-       - Organized by category
-       - With markers and icons
-
-    4. **implementation_recommendations**
-       - Next action items
-       - Risks and mitigation
-       - Quality metrics
+    ## Deliverables
+    - tasks_by_feasibility: {ready, pending, research, blocked}
+    - user_questions: Array with options for AskUserQuestion tool
+    - checklist_structure: Complete markdown checklist
+    - implementation_recommendations: Next actions and quality metrics
   `
 })
 ```
