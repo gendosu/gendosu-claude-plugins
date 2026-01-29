@@ -620,14 +620,12 @@ ELSE
 END IF
 ```
 
-**⚠️ Truth Table: PASS/FAIL Criteria**
+**⚠️ Verification Checklist**
 
-| questions.md Expected | AskUserQuestion Executed | Result | Action |
-|----------------------|--------------------------|--------|---------|
-| ✅ Yes (questions exist) | ✅ Yes (tool executed) | **PASS** | Proceed to Phase 4 |
-| ✅ Yes (questions exist) | ❌ No (tool NOT executed) | **FAIL** | Return to Phase 3 Step 9 |
-| ❌ No (no questions) | ❌ No (tool NOT executed) | **PASS** | Proceed to Phase 4 |
-| ❌ No (no questions) | ✅ Yes (tool executed) | **ANOMALY** | Investigate logic error |
+Before proceeding to Phase 4, verify:
+- [ ] If questions.md exists, AskUserQuestion was executed (FAIL if not executed)
+- [ ] If no questions needed, AskUserQuestion was NOT executed (PASS if not executed)
+- [ ] Investigate if AskUserQuestion executed without questions.md (ANOMALY)
 
 ### Action on Failure
 
@@ -818,38 +816,15 @@ The following files MUST be created by the Main Claude executor (NOT by agents) 
         - **Scenario 4**: Questions file was updated after answers were recorded
           - Root cause: Phase 3 re-execution without Phase 4 entrance guard check
           - Recovery: Use timestamp comparison, re-ask only newly added questions
-      - [ ] **Quantified Validation Criteria Matrix**:
-
-        **📊 Measurable Success/Failure Thresholds**
-
-        | Metric | Measurement Method | Success Threshold | Failure Threshold |
-        |--------|-------------------|-------------------|-------------------|
-        | **Question Count** | `grep -c "^##" questions.md` | N questions | N questions |
-        | **Answer Count** | `grep -c "^##" answers.md` | N answers | M answers (M < N) |
-        | **1:1 Mapping** | `question_count == answer_count` | ✅ True | ❌ False |
-        | **Completeness** | All questions have non-empty answers | ✅ 100% | ❌ <100% |
-        | **File Existence** | Both questions.md and answers.md exist | ✅ Both exist | ❌ Missing answers.md |
-
-        **⚠️ Validation Decision Matrix**
-
-        | Questions Exist | Answers File Exists | Question Count == Answer Count | All Answers Complete | Verdict | Action |
-        |----------------|--------------------|---------------------------------|---------------------|---------|--------|
-        | ✅ Yes | ✅ Yes | ✅ Yes (1:1 mapping) | ✅ Yes (100%) | **SUCCESS** | Proceed to Step 11 |
-        | ✅ Yes | ✅ Yes | ✅ Yes (1:1 mapping) | ❌ No (incomplete) | **FAILURE** | Execute recovery procedure |
-        | ✅ Yes | ✅ Yes | ❌ No (gap exists) | N/A | **FAILURE** | Execute recovery procedure |
-        | ✅ Yes | ❌ No | N/A | N/A | **FAILURE** | Execute recovery procedure |
-        | ✅ Yes | ⚠️ Yes (but empty) | ❌ No (0 answers) | ❌ No | **FAILURE** | Execute recovery procedure |
-        | ❌ No | ❌ No | N/A | N/A | **SUCCESS** | No questions needed, proceed |
-        | ❌ No | ✅ Yes | N/A | N/A | **ANOMALY** | Investigate unexpected answers file |
-
-        **🔍 Gray Zone Scenarios** (Require Human Judgment → Return to Phase 3 Step 9)
-
-        | Scenario | Detection Method | Indicator | Resolution |
-        |----------|------------------|-----------|------------|
-        | **Questions marked unnecessary** | Questions file exists but answers file states "No questions needed" | answers.md contains disclaimer instead of 1:1 answers | Return to Phase 3 Step 9 to re-evaluate necessity |
-        | **Partial execution claim** | Question count matches answer count, but answers contain TODO/placeholder text | Answers contain strings like "TBD", "[待機中]", "TODO" | Execute recovery procedure to complete answers |
-        | **Timestamp mismatch** | Questions file modified after answers file created | `questions.md mtime > answers.md mtime` | Return to Phase 3 Step 9 to process new questions |
-        | **Format inconsistency** | Question headers don't match answer headers | Header text mismatch between files | Execute recovery procedure to align headers |
+      - [ ] **Validation Checklist**:
+        - [ ] Both questions.md and answers.md files exist (if questions were needed)
+        - [ ] Question count equals answer count (verify 1:1 mapping with `grep -c "^##"`)
+        - [ ] All answers are complete with no TODO/placeholder text
+        - [ ] Question headers match answer headers exactly
+        - [ ] answers.md timestamp is newer than questions.md (no new unanswered questions)
+        - [ ] **SUCCESS**: All checks pass → Proceed to Step 11
+        - [ ] **FAILURE**: Any check fails → Execute recovery procedure
+        - [ ] **ANOMALY**: Unexpected state (e.g., answers.md exists without questions.md) → Investigate
     - **Technical Consistency Verification**: Reconfirm whether the proposed tasks are technically executable
     - **Dependency Verification**: Confirm whether dependencies between tasks are correctly set
     - **Research Rationale Verification**: Confirm whether there are any omissions in the recorded research results
