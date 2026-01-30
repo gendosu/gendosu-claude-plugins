@@ -1,59 +1,59 @@
-# Claude Code ステータスライン設定スキル
+# Claude Code Statusline Configuration Skill
 
-Claude Code のステータスライン表示を自動的に設定するスキルです。
+A skill that automatically configures the Claude Code statusline display.
 
-## 概要
+## Overview
 
-このスキルを使用すると、以下の情報を表示するカスタムステータスラインを自動設定できます：
+Using this skill, you can automatically configure a custom statusline that displays the following information:
 
-- 📁 **ディレクトリ名**
-- 🌿 **Git ブランチ名**（括弧内、現在のブランチ）
-- 🤖 **モデル名**（角括弧内、使用中のモデル）
-- 📊 **トークン情報**（合計、入力、出力、キャッシュ読み取り）
+- 📁 **Directory name**
+- 🌿 **Git branch name** (in parentheses, the current branch)
+- 🤖 **Model name** (in square brackets, the model in use)
+- 📊 **Token information** (total, input, output, cache reads)
 
-### 表示例
+### Display Example
 
 ```
 gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)
 ```
 
-## 主な機能
+## Key Features
 
-- ✅ **自動設定**: 1コマンドでステータスライン設定が完了
-- ✅ **既存設定の保護**: 既存の `settings.json` を保持しながらマージ
-- ✅ **バックアップ作成**: 設定ファイル更新前に自動バックアップ
-- ✅ **冪等性**: 複数回実行しても安全
-- ✅ **エラーハンドリング**: 分かりやすいエラーメッセージ
+- ✅ **Automatic Configuration**: Setup complete with a single command
+- ✅ **Existing Configuration Protection**: Merges while preserving existing `settings.json`
+- ✅ **Automatic Backup**: Creates automatic backup before updating configuration files
+- ✅ **Idempotence**: Safe to run multiple times
+- ✅ **Error Handling**: Clear error messages
 
-## 使用方法
+## Usage
 
-### スキル経由での実行（推奨）
+### Execution via Skill (Recommended)
 
-Claude Code の対話中に以下のように指示してください：
-
-```
-ステータスラインを設定して
-```
-
-または
+During Claude Code interaction, instruct as follows:
 
 ```
-statuslineをセットアップ
+Set up the statusline
 ```
 
-### 直接実行
+Or
+
+```
+Setup statusline
+```
+
+### Direct Execution
 
 ```bash
 .claude/skills/setup-statusline/setup.sh
 ```
 
-## 前提条件
+## Prerequisites
 
-### 必須
+### Required
 
-- **jq**: JSON処理に使用
+- **jq**: Used for JSON processing
 
-#### jq のインストール
+#### Installing jq
 
 **macOS:**
 ```bash
@@ -70,17 +70,17 @@ sudo apt-get install jq
 sudo dnf install jq
 ```
 
-**確認方法:**
+**Verification:**
 ```bash
 jq --version
-# jq-1.6 のような出力が表示されればOK
+# Output like jq-1.6 indicates success
 ```
 
-## 設定内容
+## Configuration Details
 
 ### 1. `~/.claude/settings.json`
 
-以下の設定が追加されます（既存設定は保持）：
+The following settings are added (existing settings are preserved):
 
 ```json
 {
@@ -94,75 +94,75 @@ jq --version
 
 ### 2. `~/.claude/statusline.sh`
 
-カスタムスクリプトが作成され、以下の情報を表示します：
+A custom script is created that displays the following information:
 
-- **ディレクトリ名**: `basename` で現在のディレクトリ名を取得
-- **Git ブランチ**: `git branch --show-current` で現在のブランチを取得
-- **モデル名**: Claude Code から渡される `model.display_name` を使用
-- **トークン情報**: 入力トークン、出力トークン、キャッシュトークンの詳細
+- **Directory name**: Retrieves current directory name using `basename`
+- **Git branch**: Obtains current branch using `git branch --show-current`
+- **Model name**: Uses `model.display_name` passed from Claude Code
+- **Token information**: Details of input tokens, output tokens, and cache tokens
 
-## トラブルシューティング
+## Troubleshooting
 
-### ❌ "jq が見つかりません"
+### ❌ "jq not found"
 
-**原因**: `jq` コマンドがインストールされていません
+**Cause**: `jq` command is not installed
 
-**解決方法**: 上記の「前提条件」セクションに従って `jq` をインストールしてください
+**Solution**: Follow the "Prerequisites" section above to install `jq`
 
-### ❌ "~/.claude/ ディレクトリの作成に失敗しました"
+### ❌ "Failed to create ~/.claude/ directory"
 
-**原因**: ホームディレクトリへの書き込み権限がありません
+**Cause**: You don't have write permissions to the home directory
 
-**解決方法**:
+**Solution**:
 ```bash
-# ホームディレクトリの権限を確認
+# Check home directory permissions
 ls -ld ~/
-# 必要に応じて権限を修正
+# Fix permissions if needed
 chmod 755 ~/
 ```
 
-### ❌ ステータスラインが表示されない
+### ❌ Statusline not displaying
 
-**確認事項**:
-1. Claude Code を再起動してください
-2. `~/.claude/settings.json` に `statusLine` セクションがあることを確認
-3. `~/.claude/statusline.sh` が実行可能であることを確認:
+**Verification:**
+1. Restart Claude Code
+2. Verify that `statusLine` section exists in `~/.claude/settings.json`
+3. Verify that `~/.claude/statusline.sh` is executable:
    ```bash
    ls -l ~/.claude/statusline.sh
-   # -rwxr-xr-x のような表示が必要
+   # Should display something like -rwxr-xr-x
    ```
 
-### ❌ トークン情報が表示されない
+### ❌ Token information not displaying
 
-**原因**: スクリプトの実行に必要な `jq` が正しく動作していない可能性があります
+**Cause**: The `jq` required for script execution may not be working correctly
 
-**解決方法**:
+**Solution**:
 ```bash
-# jq が正しくインストールされているか確認
+# Verify jq is correctly installed
 jq --version
 
-# スクリプトを直接テストしてエラーを確認
+# Test the script directly to check for errors
 echo '{"workspace":{"current_dir":"/app"},"model":{"display_name":"Sonnet"},"context_window":{"current_usage":{"input_tokens":1000,"output_tokens":500}}}' | ~/.claude/statusline.sh
 ```
 
-## 技術詳細
+## Technical Details
 
-### スクリプトの動作
+### Script Behavior
 
-1. **JSON入力の受信**: Claude Code からステータスライン情報を JSON 形式で受信
-2. **データ抽出**: `jq` で必要な情報を抽出
-3. **Git 情報取得**: 現在のディレクトリから Git ブランチ情報を取得
-4. **フォーマット**: 指定された形式で文字列を整形
-5. **出力**: フォーマット済みの文字列を標準出力に出力
+1. **JSON Input Reception**: Receives statusline information in JSON format from Claude Code
+2. **Data Extraction**: Extracts necessary information using `jq`
+3. **Git Information Retrieval**: Obtains Git branch information from the current directory
+4. **Formatting**: Formats the string in the specified format
+5. **Output**: Outputs the formatted string to standard output
 
-### 設計上の考慮事項
+### Design Considerations
 
-- **エラーハンドリング**: `set -e` で厳格なエラー処理
-- **冪等性**: 複数回実行しても同じ結果
-- **バックアップ**: 既存ファイルは `.backup` サフィックスで保存
-- **セキュリティ**: ホームディレクトリ内のみ操作、sudo 不要
+- **Error Handling**: Strict error handling with `set -e`
+- **Idempotence**: Same results even when run multiple times
+- **Backup**: Existing files are saved with `.backup` suffix
+- **Security**: Operates only within home directory, no sudo required
 
-## ファイル構成
+## File Structure
 
 ```
 plugins/awesome-statusline/skills/setup-statusline/
@@ -171,6 +171,6 @@ plugins/awesome-statusline/skills/setup-statusline/
 └── setup.sh
 ```
 
-## ライセンス
+## License
 
-このスキルは awesome-statusline プラグインの一部として提供されています。
+This skill is provided as part of the awesome-statusline plugin.

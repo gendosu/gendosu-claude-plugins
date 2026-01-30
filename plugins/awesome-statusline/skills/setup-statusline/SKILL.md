@@ -1,58 +1,58 @@
 ---
 name: setup-statusline
 description: Setup Claude Code statusline configuration automatically (global)
-trigger: ユーザーが「ステータスラインを設定」「statuslineをセットアップ」「ステータスライン設定して」「statusline設定」などと指示した場合、または自然言語で「ステータスバーを設定して」「status lineを初期化して」などと指示した場合
+trigger: When the user instructs to "set up the statusline", "setup statusline", "configure statusline", "statusline setup", or similar in natural language such as "initialize the status bar", "set up status line", etc.
 ---
 
-# Claude Code ステータスライン設定スキル
+# Claude Code Statusline Configuration Skill
 
-**MANDATORY**: このスキルは、ユーザーが Claude Code のステータスライン設定を要求した場合に **MUST** 使用されます。
+**MANDATORY**: This skill **MUST** be used when the user requests Claude Code statusline configuration.
 
-## トリガー条件
+## Trigger Conditions
 
-以下のいずれかの指示があった場合、このスキルを自動的に使用してください：
-- 「ステータスラインを設定」
-- 「statuslineをセットアップ」
-- 「ステータスライン設定して」
-- 「statusline設定」
-- 「ステータスバーを設定して」
-- 「status lineを初期化して」
-- 「Claude Codeのステータスライン」
+Automatically use this skill when any of the following instructions are given:
+- "Set up the statusline"
+- "Setup statusline"
+- "Configure statusline"
+- "Statusline setup"
+- "Set up the status bar"
+- "Initialize status line"
+- "Claude Code statusline"
 
-## 目的
+## Purpose
 
-- Claude Code のステータスライン表示を自動設定
-- グローバル設定 (`~/.claude/settings.json`) にステータスライン設定を追加
-- カスタムスクリプト (`~/.claude/statusline.sh`) を作成
-- 既存の設定を保持しながら安全にマージ
+- Automatically configure Claude Code statusline display
+- Add statusline configuration to global settings (`~/.claude/settings.json`)
+- Create a custom script (`~/.claude/statusline.sh`)
+- Safely merge while preserving existing settings
 
-## スキル呼び出し方法
+## Skill Invocation Method
 
-このスキルは Skill ツールで呼び出します：
+This skill is invoked using the Skill tool:
 
 ```
 Skill(skill="setup-statusline")
 ```
 
-引数は不要です。
+No arguments are required.
 
-## 実行手順
+## Execution Steps
 
-### 1. セットアップの実行
+### 1. Running Setup
 
 ```bash
 .claude/skills/setup-statusline/setup.sh
 ```
 
-このスクリプトは以下を自動的に実行します：
-1. **前提条件チェック**: `jq` コマンドのインストール確認
-2. **ディレクトリ作成**: `~/.claude/` ディレクトリの確認/作成
-3. **設定ファイルのマージ**: `~/.claude/settings.json` に statusLine セクションを追加（既存設定は保持）
-4. **スクリプト作成**: `~/.claude/statusline.sh` を作成して実行権限を付与
+This script automatically executes the following:
+1. **Prerequisites Check**: Verify `jq` command installation
+2. **Directory Creation**: Check/create `~/.claude/` directory
+3. **Settings File Merge**: Add statusLine section to `~/.claude/settings.json` (preserving existing settings)
+4. **Script Creation**: Create `~/.claude/statusline.sh` and grant execute permission
 
-### 2. 設定内容
+### 2. Configuration Details
 
-**追加される設定 (`~/.claude/settings.json`):**
+**Configuration to be added (`~/.claude/settings.json`):**
 ```json
 {
   "statusLine": {
@@ -63,40 +63,40 @@ Skill(skill="setup-statusline")
 }
 ```
 
-**作成されるスクリプト (`~/.claude/statusline.sh`):**
-- ディレクトリ名
-- Git ブランチ名（括弧内）
-- モデル名（角括弧内）
-- トークン情報（合計、入力、出力、キャッシュ）
+**Script to be created (`~/.claude/statusline.sh`):**
+- Directory name
+- Git branch name (in parentheses)
+- Model name (in square brackets)
+- Token information (total, input, output, cache)
 
-### 3. 表示例
+### 3. Display Example
 
 ```
 gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)
 ```
 
-### 4. 実行結果の判定
+### 4. Execution Result Determination
 
-- ✅ **成功**: スクリプトが終了コード 0 で終了、成功メッセージを表示
-- ❌ **失敗**: スクリプトが非 0 の終了コードで終了、エラーメッセージを表示
+- ✅ **Success**: Script exits with code 0 and displays success message
+- ❌ **Failure**: Script exits with non-zero code and displays error message
 
-## 重要なルール
+## Important Rules
 
-1. **既存設定の保護**: 既存の `settings.json` の設定は保持される
-2. **バックアップ作成**: 設定ファイル更新時に自動的に `.backup` ファイルを作成
-3. **冪等性**: 複数回実行しても安全
-4. **jq必須**: JSON操作に `jq` コマンドが必要
+1. **Existing Settings Protection**: Existing `settings.json` settings are preserved
+2. **Automatic Backup Creation**: Automatically creates `.backup` files when updating configuration
+3. **Idempotence**: Safe to run multiple times
+4. **jq Required**: `jq` command is necessary for JSON operations
 
-## セキュリティ
+## Security
 
-- スクリプト権限: 755 (rwxr-xr-x)
-- 設定ファイル権限: 644 (rw-r--r--)
-- ホームディレクトリ内のみ操作
-- sudo 権限不要
+- Script permissions: 755 (rwxr-xr-x)
+- Configuration file permissions: 644 (rw-r--r--)
+- Operates only within home directory
+- No sudo privileges required
 
-## トラブルシューティング
+## Troubleshooting
 
-### jq が見つからない場合
+### When jq is not found
 
 **macOS:**
 ```bash
@@ -113,14 +113,14 @@ sudo apt-get install jq
 sudo dnf install jq
 ```
 
-### 権限エラーの場合
+### When permission errors occur
 
-`~/.claude/` ディレクトリの権限を確認：
+Check permissions for `~/.claude/` directory:
 ```bash
 ls -ld ~/.claude/
 chmod 755 ~/.claude/
 ```
 
-## 参考資料
+## References
 
-- [README.md](README.md) - 詳細な使用方法とトラブルシューティング
+- [README.md](README.md) - Detailed usage instructions and troubleshooting

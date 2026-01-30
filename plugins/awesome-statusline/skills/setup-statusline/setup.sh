@@ -2,57 +2,57 @@
 
 set -e
 
-# カラー定義
+# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# ヘルプメッセージ
+# Help message
 show_help() {
     cat << EOF
-Claude Code ステータスライン設定スクリプト
+Claude Code Statusline Configuration Script
 
-使用方法:
+Usage:
   $0 [OPTIONS]
 
-オプション:
-  --help    このヘルプメッセージを表示
+Options:
+  --help    Display this help message
 
-説明:
-  このスクリプトは Claude Code のステータスライン表示を自動設定します。
-  以下の処理を実行します:
-    1. jq コマンドのインストール確認
-    2. ~/.claude/ ディレクトリの確認/作成
-    3. ~/.claude/settings.json に statusLine 設定を追加（既存設定は保持）
-    4. ~/.claude/statusline.sh スクリプトを作成
+Description:
+  This script automatically configures Claude Code statusline display.
+  It executes the following processes:
+    1. Verify jq command installation
+    2. Check/create ~/.claude/ directory
+    3. Add statusLine configuration to ~/.claude/settings.json (preserving existing settings)
+    4. Create ~/.claude/statusline.sh script
 
-前提条件:
-  - jq コマンドがインストールされている必要があります
+Prerequisites:
+  - jq command must be installed
     macOS:        brew install jq
     Ubuntu/Debian: sudo apt-get install jq
     Fedora/RHEL:  sudo dnf install jq
 
-設定内容:
-  - ディレクトリ名
-  - Git ブランチ名（括弧内）
-  - モデル名（角括弧内）
-  - トークン情報（合計、入力、出力、キャッシュ）
+Configuration includes:
+  - Directory name
+  - Git branch name (in parentheses)
+  - Model name (in square brackets)
+  - Token information (total, input, output, cache)
 
-例:
+Example:
   $0
 EOF
 }
 
-# jq のインストール確認
+# Check jq installation
 check_jq_installed() {
-    echo -e "${BLUE}前提条件をチェック中...${NC}"
+    echo -e "${BLUE}Checking prerequisites...${NC}"
 
     if ! command -v jq &> /dev/null; then
-        echo -e "${RED}❌ jq が見つかりません${NC}"
+        echo -e "${RED}❌ jq not found${NC}"
         echo ""
-        echo "jq をインストールしてください:"
+        echo "Please install jq:"
         echo "  macOS:         brew install jq"
         echo "  Ubuntu/Debian: sudo apt-get install jq"
         echo "  Fedora/RHEL:   sudo dnf install jq"
@@ -60,63 +60,63 @@ check_jq_installed() {
         exit 1
     fi
 
-    echo -e "${GREEN}✅ jq が見つかりました${NC}"
+    echo -e "${GREEN}✅ jq found${NC}"
 }
 
-# ~/.claude/ ディレクトリの確認/作成
+# Check/create ~/.claude/ directory
 check_claude_dir() {
     local CLAUDE_DIR="$HOME/.claude"
 
-    echo -e "${BLUE}Claude ディレクトリをチェック中...${NC}"
+    echo -e "${BLUE}Checking Claude directory...${NC}"
 
     if [ ! -d "$CLAUDE_DIR" ]; then
-        echo -e "${YELLOW}~/.claude/ ディレクトリが見つかりません。作成します...${NC}"
+        echo -e "${YELLOW}~/.claude/ directory not found. Creating...${NC}"
         mkdir -p "$CLAUDE_DIR" || {
-            echo -e "${RED}❌ ~/.claude/ ディレクトリの作成に失敗しました${NC}"
+            echo -e "${RED}❌ Failed to create ~/.claude/ directory${NC}"
             exit 1
         }
-        echo -e "${GREEN}✅ ~/.claude/ ディレクトリを作成しました${NC}"
+        echo -e "${GREEN}✅ ~/.claude/ directory created${NC}"
     else
-        echo -e "${GREEN}✅ ~/.claude/ ディレクトリが見つかりました${NC}"
+        echo -e "${GREEN}✅ ~/.claude/ directory found${NC}"
     fi
 }
 
-# settings.json のマージ
+# Merge settings.json
 merge_settings() {
     local SETTINGS_FILE="$HOME/.claude/settings.json"
     local STATUSLINE_CONFIG='{"type":"command","command":"~/.claude/statusline.sh","padding":0}'
 
-    echo -e "${BLUE}settings.json を更新中...${NC}"
+    echo -e "${BLUE}Updating settings.json...${NC}"
 
     if [ -f "$SETTINGS_FILE" ]; then
-        # バックアップ作成
+        # Create backup
         cp "$SETTINGS_FILE" "$SETTINGS_FILE.backup"
-        echo -e "${YELLOW}既存の設定をバックアップしました: $SETTINGS_FILE.backup${NC}"
+        echo -e "${YELLOW}Backed up existing settings: $SETTINGS_FILE.backup${NC}"
 
-        # JSON をマージ
+        # Merge JSON
         jq ". + {\"statusLine\": $STATUSLINE_CONFIG}" "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
         mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
-        echo -e "${GREEN}✅ settings.json を更新しました（既存設定は保持）${NC}"
+        echo -e "${GREEN}✅ settings.json updated (existing settings preserved)${NC}"
     else
-        # 新規作成
+        # Create new
         echo "{\"statusLine\": $STATUSLINE_CONFIG}" | jq '.' > "$SETTINGS_FILE"
-        echo -e "${GREEN}✅ settings.json を新規作成しました${NC}"
+        echo -e "${GREEN}✅ settings.json created${NC}"
     fi
 }
 
-# statusline.sh の作成
+# Create statusline.sh
 create_statusline_script() {
     local SCRIPT_FILE="$HOME/.claude/statusline.sh"
 
-    echo -e "${BLUE}statusline.sh を作成中...${NC}"
+    echo -e "${BLUE}Creating statusline.sh...${NC}"
 
-    # 既存ファイルのバックアップ
+    # Backup existing file
     if [ -f "$SCRIPT_FILE" ]; then
         cp "$SCRIPT_FILE" "$SCRIPT_FILE.backup"
-        echo -e "${YELLOW}既存のスクリプトをバックアップしました: $SCRIPT_FILE.backup${NC}"
+        echo -e "${YELLOW}Backed up existing script: $SCRIPT_FILE.backup${NC}"
     fi
 
-    # スクリプト作成
+    # Create script
     cat > "$SCRIPT_FILE" << 'EOF'
 #!/bin/bash
 
@@ -125,7 +125,7 @@ input=$(cat)
 current_dir=$(echo "$input" | jq -r '.workspace.current_dir')
 model_name=$(echo "$input" | jq -r '.model.display_name')
 
-# Git ブランチ情報を取得
+# Get Git branch information
 git_branch=""
 if [ -d "$current_dir/.git" ] || git -C "$current_dir" rev-parse --git-dir > /dev/null 2>&1; then
     git_branch=$(git -C "$current_dir" branch --show-current 2>/dev/null)
@@ -134,7 +134,7 @@ if [ -d "$current_dir/.git" ] || git -C "$current_dir" rev-parse --git-dir > /de
     fi
 fi
 
-# トークン情報を取得
+# Get token information
 usage=$(echo "$input" | jq '.context_window.current_usage')
 token_info=""
 
@@ -144,12 +144,12 @@ if [ "$usage" != "null" ]; then
     cache_creation=$(echo "$usage" | jq -r '.cache_creation_input_tokens // 0')
     cache_read=$(echo "$usage" | jq -r '.cache_read_input_tokens // 0')
 
-    # 合計トークン数を計算
+    # Calculate total tokens
     total=$((input_tokens + output_tokens + cache_creation + cache_read))
 
-    # トークン数を K (千) 単位で表示
+    # Display tokens in K (thousands) unit
     if [ $total -gt 1000 ]; then
-        # awk で小数点1桁まで表示
+        # Use awk to display with 1 decimal place
         total_display=$(awk "BEGIN {printf \"%.1f\", $total / 1000}")"K"
     else
         total_display="$total"
@@ -165,25 +165,25 @@ printf "%s%s [%s]%s" \
     "$token_info"
 EOF
 
-    # 実行権限付与
+    # Set execute permission
     chmod +x "$SCRIPT_FILE"
-    echo -e "${GREEN}✅ statusline.sh を作成しました（実行権限付与済み）${NC}"
+    echo -e "${GREEN}✅ statusline.sh created (execute permission granted)${NC}"
 }
 
-# メイン処理
+# Main process
 main() {
-    # --help オプションのチェック
+    # Check --help option
     if [ "$1" == "--help" ]; then
         show_help
         exit 0
     fi
 
     echo -e "${GREEN}========================================${NC}"
-    echo -e "${GREEN}Claude Code ステータスライン設定${NC}"
+    echo -e "${GREEN}Claude Code Statusline Configuration${NC}"
     echo -e "${GREEN}========================================${NC}"
     echo ""
 
-    # 各処理を実行
+    # Execute each process
     check_jq_installed
     echo ""
 
@@ -197,15 +197,15 @@ main() {
     echo ""
 
     echo -e "${GREEN}========================================${NC}"
-    echo -e "${GREEN}✅ セットアップが完了しました！${NC}"
+    echo -e "${GREEN}✅ Setup completed!${NC}"
     echo -e "${GREEN}========================================${NC}"
     echo ""
-    echo -e "次回 Claude Code を起動すると、ステータスラインが表示されます。"
+    echo -e "The statusline will be displayed when you launch Claude Code next time."
     echo ""
-    echo -e "表示例:"
+    echo -e "Display example:"
     echo -e "  gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)"
     echo ""
 }
 
-# スクリプト実行
+# Execute script
 main "$@"
