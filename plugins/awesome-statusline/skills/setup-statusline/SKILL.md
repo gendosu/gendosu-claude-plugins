@@ -64,15 +64,15 @@ Skill(skill="setup-statusline")
 ```
 
 **作成されるスクリプト (`~/.claude/statusline.sh`):**
-- ディレクトリ名（青色）
-- Git ブランチ名（括弧内、薄い色）
-- モデル名（角括弧内、薄い色）
+- ディレクトリ名
+- Git ブランチ名（括弧内）
+- モデル名（角括弧内）
 - トークン情報（合計、入力、出力、キャッシュ）
 
 ### 3. 表示例
 
 ```
-skillth (feature/setup-statusline) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)
+gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)
 ```
 
 ### 4. 実行結果の判定
