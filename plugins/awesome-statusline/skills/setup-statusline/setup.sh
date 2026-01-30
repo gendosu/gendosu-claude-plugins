@@ -35,7 +35,7 @@ Claude Code ステータスライン設定スクリプト
     Fedora/RHEL:  sudo dnf install jq
 
 設定内容:
-  - ディレクトリ名（青色）
+  - ディレクトリ名
   - Git ブランチ名（括弧内）
   - モデル名（角括弧内）
   - トークン情報（合計、入力、出力、キャッシュ）
@@ -158,7 +158,7 @@ if [ "$usage" != "null" ]; then
     token_info=" | 📊 ${total_display} (In:${input_tokens} Out:${output_tokens} Cache:${cache_read})"
 fi
 
-printf "\033[36m%s\033[0m\033[2m%s [%s]%s\033[0m" \
+printf "%s%s [%s]%s" \
     "$(basename "$current_dir")" \
     "$git_branch" \
     "$model_name" \
@@ -203,7 +203,7 @@ main() {
     echo -e "次回 Claude Code を起動すると、ステータスラインが表示されます。"
     echo ""
     echo -e "表示例:"
-    echo -e "  ${BLUE}skillth${NC}${YELLOW} (feature/setup-statusline)${NC} [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)"
+    echo -e "  gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)"
     echo ""
 }
 
