@@ -21,6 +21,10 @@ trigger_words:
   - cherry-pick
   - reset
   - reflog
+  - コミット
+  - プッシュ
+  - プルリク
+  - プルリクエスト
 ---
 
 ## Core Guidelines
