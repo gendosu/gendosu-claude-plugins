@@ -14,14 +14,17 @@
     {
       "name": "cccp",
       "description": "Git operations specialist skill and micro-commit command for test-driven development workflows",
-      "source": "./plugins/cccp",
+      "source": {
+        "source": "github",
+        "repo": "gendosu/agent-skills"
+      },
       "category": "productivity",
       "author": {
         "name": "GENDOSU",
         "email": "gendosu@gmail.com"
       },
-      "homepage": "https://github.com/gendosu/gendosu-claude-plugins/tree/main/plugins/cccp",
-      "repository": "https://github.com/gendosu/gendosu-claude-plugins",
+      "homepage": "https://github.com/gendosu/agent-skills",
+      "repository": "https://github.com/gendosu/agent-skills",
       "license": "MIT",
       "keywords": ["git", "commit", "workflow", "tdd", "micro-commit"]
     },
