@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "gendosu-claude-plugins",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "metadata": {
     "description": "A collection of development utility plugins for Claude Code",
     "pluginRoot": "./plugins"
@@ -55,6 +55,23 @@
       "repository": "https://github.com/gendosu/gendosu-claude-plugins",
       "license": "MIT",
       "keywords": ["codex", "mcp", "code-review", "research", "documentation", "ai-assistant"]
+    },
+    {
+      "name": "agkan-skills",
+      "description": "Task management workflow skills for agkan CLI with kanban-based task planning, execution, and progress tracking",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/gendosu/agkan-skills.git"
+      },
+      "category": "productivity",
+      "author": {
+        "name": "GENDOSU",
+        "email": "gendosu@gmail.com"
+      },
+      "homepage": "https://github.com/gendosu/agkan-skills",
+      "repository": "https://github.com/gendosu/agkan-skills",
+      "license": "MIT",
+      "keywords": ["agkan", "task-management", "kanban", "workflow", "planning"]
     }
   ]
 }
