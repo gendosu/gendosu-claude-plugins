@@ -75,12 +75,6 @@ Gendosu Claude Plugins is a monorepo providing productivity plugins for Claude C
       <td>Claude Code statusline automatic setup</td>
     </tr>
     <tr>
-      <td rowspan="1"><strong>codex</strong><br><a href="./plugins/codex/README.md">📖 Details</a></td>
-      <td>Skill</td>
-      <td>codex</td>
-      <td>Codex MCP integration - Code review, technical research, documentation generation, custom queries</td>
-    </tr>
-    <tr>
       <td rowspan="1"><strong>skill-creator</strong><br><a href="./plugins/skill-creator/README.md">📖 Details</a></td>
       <td>Skill</td>
       <td>skill-creator</td>

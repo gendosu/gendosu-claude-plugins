@@ -75,12 +75,6 @@ Gendosu Claude Pluginsは、Claude Code向けの生産性向上プラグイン�
       <td>Claude Code ステータスライン自動セットアップ</td>
     </tr>
     <tr>
-      <td rowspan="1"><strong>codex</strong><br><a href="./plugins/codex/README.md">📖 詳細</a></td>
-      <td>Skill</td>
-      <td>codex</td>
-      <td>Codex MCP連携 - コードレビュー、技術調査、ドキュメント生成、カスタムクエリ</td>
-    </tr>
-    <tr>
       <td rowspan="1"><strong>skill-creator</strong><br><a href="./plugins/skill-creator/README.md">📖 詳細</a></td>
       <td>Skill</td>
       <td>skill-creator</td>

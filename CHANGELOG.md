@@ -5,6 +5,11 @@ All notable changes to this marketplace configuration will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-04-02
+
+### Removed
+- codex plugin directory and marketplace entry
+
 ## [1.2.0] - 2026-02-21
 
 ### Added
