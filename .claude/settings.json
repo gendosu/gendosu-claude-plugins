@@ -7,7 +7,8 @@
       "source": {
         "source": "directory",
         "path": "./."
-      }
+      },
+      "autoUpdate": true
     }
   }
 }
