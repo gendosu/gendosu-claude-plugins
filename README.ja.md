@@ -33,12 +33,7 @@ Gendosu Claude Pluginsは、Claude Code向けの生産性向上プラグイン�
   </thead>
   <tbody>
     <tr>
-      <td rowspan="7"><strong>CCCP</strong><br>(Claude Code Command Pack)<br><a href="./plugins/cccp/README.md">📖 詳細</a></td>
-      <td>Agent</td>
-      <td>git-operations-specialist</td>
-      <td>Git操作を専門的に処理（コミット、ブランチ、マージ、競合解決）</td>
-    </tr>
-    <tr>
+      <td rowspan="6"><strong>CCCP</strong><br>(Claude Code Command Pack)<br><a href="./plugins/cccp/README.md">📖 詳細</a></td>
       <td>Agent</td>
       <td>project-manager</td>
       <td>プロジェクト管理支援（計画、進捗追跡、タスク調整、リスク評価など）</td>

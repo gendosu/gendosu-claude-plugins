@@ -33,12 +33,7 @@ Gendosu Claude Plugins is a monorepo providing productivity plugins for Claude C
   </thead>
   <tbody>
     <tr>
-      <td rowspan="7"><strong>CCCP</strong><br>(Claude Code Command Pack)<br><a href="./plugins/cccp/README.md">📖 Details</a></td>
-      <td>Agent</td>
-      <td>git-operations-specialist</td>
-      <td>Specialized Git operations handling (commit, branch, merge, conflict resolution)</td>
-    </tr>
-    <tr>
+      <td rowspan="6"><strong>CCCP</strong><br>(Claude Code Command Pack)<br><a href="./plugins/cccp/README.md">📖 Details</a></td>
       <td>Agent</td>
       <td>project-manager</td>
       <td>Project management support (planning, progress tracking, task coordination, risk assessment, etc.)</td>
