@@ -39,6 +39,7 @@ Configuration includes:
   - Git branch name (in parentheses)
   - Model name (in square brackets)
   - Token information (total, input, output, cache)
+  - Rate limit usage with reset times (5-hour / weekly; claude.ai Pro/Max only)
 
 Example:
   $0
@@ -158,11 +159,34 @@ if [ "$usage" != "null" ]; then
     token_info=" | 📊 ${total_display} (In:${input_tokens} Out:${output_tokens} Cache:${cache_read})"
 fi
 
-printf "%s%s [%s]%s" \
+# Format epoch seconds as local time (BSD date -r, falling back to GNU date -d)
+format_epoch() {
+    date -r "$1" "+$2" 2>/dev/null || date -d "@$1" "+$2"
+}
+
+# Get rate limit usage (claude.ai Pro/Max only; each window may be absent)
+five_h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+five_h_reset=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+week=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+week_reset=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
+limit_info=""
+if [ -n "$five_h" ]; then
+    limit_info+="5h:$(printf '%.0f' "$five_h")%"
+    [ -n "$five_h_reset" ] && limit_info+="(→$(format_epoch "$five_h_reset" '%H:%M'))"
+fi
+if [ -n "$week" ]; then
+    [ -n "$limit_info" ] && limit_info+=" "
+    limit_info+="7d:$(printf '%.0f' "$week")%"
+    [ -n "$week_reset" ] && limit_info+="(→$(format_epoch "$week_reset" '%-m/%-d %H:%M'))"
+fi
+[ -n "$limit_info" ] && limit_info=" | $limit_info"
+
+printf "%s%s [%s]%s%s" \
     "$(basename "$current_dir")" \
     "$git_branch" \
     "$model_name" \
-    "$token_info"
+    "$token_info" \
+    "$limit_info"
 EOF
 
     # Set execute permission
@@ -203,7 +227,7 @@ main() {
     echo -e "The statusline will be displayed when you launch Claude Code next time."
     echo ""
     echo -e "Display example:"
-    echo -e "  gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)"
+    echo -e "  gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0) | 5h:24%(→12:21) 7d:41%(→10/9 10:21)"
     echo ""
 }
 
