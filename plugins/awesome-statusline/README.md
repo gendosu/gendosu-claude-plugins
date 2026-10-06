@@ -4,7 +4,7 @@ Claude Code statusline setup skill for automatic statusline configuration.
 
 ## Overview
 
-The awesome-statusline plugin provides an automated setup skill for configuring Claude Code's status line display. It automatically configures your status line to show essential information like directory name, Git branch, model name, and token usage statistics.
+The awesome-statusline plugin provides an automated setup skill for configuring Claude Code's status line display. It automatically configures your status line to show essential information like directory name, Git branch, model name, token usage statistics, and rate limit usage (5-hour / weekly) with reset times.
 
 ## Features
 
@@ -12,12 +12,12 @@ The awesome-statusline plugin provides an automated setup skill for configuring 
 - ✅ **Preserve Existing Settings**: Safely merges with existing `settings.json`
 - ✅ **Automatic Backups**: Creates backups before updating settings
 - ✅ **Idempotent**: Safe to run multiple times
-- ✅ **Rich Display**: Shows directory, Git branch, model, and token information
+- ✅ **Rich Display**: Shows directory, Git branch, model, token information, and rate limit usage with reset times
 
 ### Display Example
 
 ```
-skillth (feature/setup-statusline) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)
+skillth (feature/setup-statusline) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0) | 5h:24%(→12:21) 7d:41%(→10/9 10:21)
 ```
 
 ## Installation
@@ -74,10 +74,11 @@ After installation, the following files will be created/updated:
 ### `~/.claude/statusline.sh`
 
 A shell script that generates the status line display with:
-- Directory name (blue colored)
+- Directory name
 - Git branch name (in parentheses)
 - Model name (in brackets)
 - Token statistics (total, input, output, cache)
+- Rate limit usage with reset times (`5h:24%(→12:21) 7d:41%(→10/9 10:21)`; claude.ai Pro/Max only, hidden when unavailable)
 
 ## Prerequisites
 

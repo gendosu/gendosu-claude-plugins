@@ -10,11 +10,12 @@ Using this skill, you can automatically configure a custom statusline that displ
 - 🌿 **Git branch name** (in parentheses, the current branch)
 - 🤖 **Model name** (in square brackets, the model in use)
 - 📊 **Token information** (total, input, output, cache reads)
+- ⏱️ **Rate limit usage** (5-hour / weekly usage with reset times; claude.ai Pro/Max only)
 
 ### Display Example
 
 ```
-gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)
+gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0) | 5h:24%(→12:21) 7d:41%(→10/9 10:21)
 ```
 
 ## Key Features
@@ -100,6 +101,7 @@ A custom script is created that displays the following information:
 - **Git branch**: Obtains current branch using `git branch --show-current`
 - **Model name**: Uses `model.display_name` passed from Claude Code
 - **Token information**: Details of input tokens, output tokens, and cache tokens
+- **Rate limit usage**: `rate_limits.five_hour` / `rate_limits.seven_day` (`used_percentage` and `resets_at`) passed from Claude Code. Reset times are shown in local time (`HH:MM` for 5h, `M/D HH:MM` for 7d). Windows that are absent are omitted
 
 ## Troubleshooting
 
@@ -143,6 +145,16 @@ jq --version
 
 # Test the script directly to check for errors
 echo '{"workspace":{"current_dir":"/app"},"model":{"display_name":"Sonnet"},"context_window":{"current_usage":{"input_tokens":1000,"output_tokens":500}}}' | ~/.claude/statusline.sh
+```
+
+### ❌ Rate limit usage not displaying
+
+**Cause**: `rate_limits` is only included in the statusline input for claude.ai Pro/Max subscribers, and only after the first API response in a session. Each window (`five_hour`, `seven_day`) may be absent independently.
+
+**Solution**:
+```bash
+# Send one message in Claude Code and check again, or test the script directly
+echo '{"workspace":{"current_dir":"/app"},"model":{"display_name":"Sonnet"},"rate_limits":{"five_hour":{"used_percentage":23.5,"resets_at":1738425600}}}' | ~/.claude/statusline.sh
 ```
 
 ## Technical Details

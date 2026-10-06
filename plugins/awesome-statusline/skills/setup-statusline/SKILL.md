@@ -68,11 +68,12 @@ This script automatically executes the following:
 - Git branch name (in parentheses)
 - Model name (in square brackets)
 - Token information (total, input, output, cache)
+- Rate limit usage (5-hour / weekly) with reset times (claude.ai Pro/Max only; hidden when unavailable)
 
 ### 3. Display Example
 
 ```
-gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0)
+gendosu-claude-plugins (main) [Sonnet] | 📊 38.8K (In:37442 Out:0 Cache:0) | 5h:24%(→12:21) 7d:41%(→10/9 10:21)
 ```
 
 ### 4. Execution Result Determination
