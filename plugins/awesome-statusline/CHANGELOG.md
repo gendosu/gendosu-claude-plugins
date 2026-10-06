@@ -5,6 +5,16 @@ All notable changes to the awesome-statusline plugin will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-10-06
+
+### Added
+
+- **setup-statusline**: Rate limit usage display
+  - Shows 5-hour and weekly (7-day) usage percentages from the `rate_limits` statusline input (claude.ai Pro/Max only; omitted when absent)
+  - Shows each window's reset time in local time, e.g. `5h:24%(→12:21) 7d:41%(→10/9 10:21)`
+  - Epoch-to-time conversion works with both BSD (macOS) and GNU (Linux) `date`
+  - Updated setup.sh help/output, SKILL.md, and READMEs (including README.ja.md and the stale version number)
+
 ## [0.1.2] - 2026-01-30
 
 ### Changed
@@ -35,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automatic backup creation before updates
   - jq-based JSON processing for reliable configuration
 
+[0.2.0]: https://github.com/gendosu/gendosu-claude-plugins/compare/awesome-statusline-v0.1.2...awesome-statusline-v0.2.0
 [0.1.2]: https://github.com/gendosu/gendosu-claude-plugins/compare/awesome-statusline-v0.1.1...awesome-statusline-v0.1.2
 [0.1.1]: https://github.com/gendosu/gendosu-claude-plugins/compare/awesome-statusline-v0.1.0...awesome-statusline-v0.1.1
 [0.1.0]: https://github.com/gendosu/gendosu-claude-plugins/releases/tag/awesome-statusline-v0.1.0

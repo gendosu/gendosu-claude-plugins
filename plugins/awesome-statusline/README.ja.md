@@ -159,4 +159,4 @@ https://github.com/gendosu/gendosu-claude-plugins
 
 ## バージョン
 
-0.1.2
+0.2.0
